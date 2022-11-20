@@ -1,7 +1,7 @@
 package service
 
 import (
-	"projects-subscribeme-backend/models"
+	"projects-subscribeme-backend/config/models"
 	"projects-subscribeme-backend/repository"
 	"projects-subscribeme-backend/utils"
 )

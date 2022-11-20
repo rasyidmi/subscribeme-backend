@@ -2,7 +2,7 @@ package repository
 
 import (
 	"fmt"
-	"projects-subscribeme-backend/models"
+	"projects-subscribeme-backend/config/models"
 	"projects-subscribeme-backend/utils"
 
 	"gorm.io/gorm"

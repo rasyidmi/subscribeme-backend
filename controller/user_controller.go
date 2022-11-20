@@ -3,7 +3,7 @@ package controller
 import (
 	"fmt"
 	"net/http"
-	"projects-subscribeme-backend/models"
+	"projects-subscribeme-backend/config/models"
 	"projects-subscribeme-backend/service"
 
 	"github.com/gin-gonic/gin"

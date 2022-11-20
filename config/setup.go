@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"projects-subscribeme-backend/config/models"
 	"projects-subscribeme-backend/controller"
-	"projects-subscribeme-backend/models"
 	"projects-subscribeme-backend/repository"
 	"projects-subscribeme-backend/service"
 

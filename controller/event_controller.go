@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"projects-subscribeme-backend/config/models"
 	"projects-subscribeme-backend/middleware"
-	"projects-subscribeme-backend/models"
 	"projects-subscribeme-backend/service"
 	"strconv"
 
