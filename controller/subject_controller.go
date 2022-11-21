@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 	"projects-subscribeme-backend/config/models"
-	"projects-subscribeme-backend/middleware"
 	"projects-subscribeme-backend/service"
 	"strconv"
 
@@ -19,10 +18,10 @@ func CreateSubjectController(service service.SubjectService) {
 
 // GET /mata-kuliah
 func GetAllSubjects(c *gin.Context) {
-	err := middleware.AuthMiddleware(c)
-	if err != nil {
-		return
-	}
+	// err := middleware.AuthMiddleware(c)
+	// if err != nil {
+	// 	return
+	// }
 	response, err := subjectService.GetAll()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"data": err.Error()})
@@ -34,10 +33,10 @@ func GetAllSubjects(c *gin.Context) {
 
 // GET /mata-kuliah/:id
 func GetSubjectByID(c *gin.Context) {
-	err := middleware.AuthMiddleware(c)
-	if err != nil {
-		return
-	}
+	// err := middleware.AuthMiddleware(c)
+	// if err != nil {
+	// 	return
+	// }
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		fmt.Println("ERROR OCCURED: Error on converting string to int")
@@ -57,13 +56,13 @@ func GetSubjectByID(c *gin.Context) {
 
 // POST /mata-kuliah
 func CreateSubject(c *gin.Context) {
-	err := middleware.AuthMiddleware(c)
-	if err != nil {
-		return
-	}
+	// err := middleware.AuthMiddleware(c)
+	// if err != nil {
+	// 	return
+	// }
 	var subjectRequest models.SubjectRequest
 
-	err = c.ShouldBindJSON(&subjectRequest)
+	err := c.ShouldBindJSON(&subjectRequest)
 	if err != nil {
 		fmt.Println("ERROR OCCURED: Error on converting json to model")
 		fmt.Println(err.Error())
@@ -82,10 +81,10 @@ func CreateSubject(c *gin.Context) {
 
 // DELETE /mata-kuliah/:id
 func DeleteSubjectByID(c *gin.Context) {
-	err := middleware.AuthMiddleware(c)
-	if err != nil {
-		return
-	}
+	// err := middleware.AuthMiddleware(c)
+	// if err != nil {
+	// 	return
+	// }
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		fmt.Println("ERROR OCCURED: Error on converting string to int")
@@ -103,10 +102,10 @@ func DeleteSubjectByID(c *gin.Context) {
 
 // POST /mata-kuliah/:id
 func UpdateSubjectByID(c *gin.Context) {
-	err := middleware.AuthMiddleware(c)
-	if err != nil {
-		return
-	}
+	// err := middleware.AuthMiddleware(c)
+	// if err != nil {
+	// 	return
+	// }
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		fmt.Println("ERROR OCCURED: Error on converting string to int")

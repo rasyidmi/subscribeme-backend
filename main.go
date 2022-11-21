@@ -19,14 +19,14 @@ import (
 
 func main() {
 	config.SetupDatabase()
-	firebaseAuth := config.SetupFirebase()
+	// firebaseAuth := config.SetupFirebase()
 
 	router := gin.New()
 	router.SetTrustedProxies([]string{"127.0.0.1"})
 
-	router.Use(func(c *gin.Context) {
-		c.Set("firebaseAuth", firebaseAuth)
-	})
+	// router.Use(func(c *gin.Context) {
+	// 	c.Set("firebaseAuth", firebaseAuth)
+	// })
 	router.Use(timeout.TimeoutHandler(5*time.Second, http.StatusRequestTimeout, gin.H{"data": "Request Timeout"}))
 
 	v1Api := router.Group("/api/v1")

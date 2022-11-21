@@ -3,7 +3,6 @@ package controller
 import (
 	"fmt"
 	"net/http"
-	"projects-subscribeme-backend/middleware"
 	"projects-subscribeme-backend/service"
 	"projects-subscribeme-backend/utils"
 	"strconv"
@@ -19,10 +18,10 @@ func CreateClassController(service service.ClassService) {
 
 // GET /kelas/:id
 func GetClassByID(c *gin.Context) {
-	err := middleware.AuthMiddleware(c)
-	if err != nil {
-		return
-	}
+	// err := middleware.AuthMiddleware(c)
+	// if err != nil {
+	// 	return
+	// }
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		fmt.Println("ERROR OCCURED: Error on converting string to int")

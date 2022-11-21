@@ -4,6 +4,8 @@ import (
 	"projects-subscribeme-backend/config/models"
 	"projects-subscribeme-backend/repository"
 	"projects-subscribeme-backend/utils"
+
+	"github.com/google/uuid"
 )
 
 type UserService interface {
@@ -21,11 +23,11 @@ func CreateUserService(repo repository.UserRepository) *userService {
 
 func (s *userService) CreateUser(user models.UserRequest) error {
 	userConverted := models.User{
-		ID:     user.ID,
-		Role:   user.Role,
-		Email:  user.Email,
-		Name:   user.Name,
-		Avatar: user.Avatar,
+		Password: user.Password,
+		Role:     user.Role,
+		Email:    user.Email,
+		Name:     user.Name,
+		Avatar:   user.Avatar,
 	}
 
 	err := s.repo.CreateUser(userConverted)
@@ -35,7 +37,7 @@ func (s *userService) CreateUser(user models.UserRequest) error {
 
 func (s *userService) FindByID(id string) (models.User, error) {
 	user, err := s.repo.FindByID(id)
-	if user.ID == "" {
+	if user.ID == uuid.Nil {
 		err = utils.DataNotFound{}
 	}
 
