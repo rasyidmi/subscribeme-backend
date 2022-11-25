@@ -3,6 +3,7 @@ package controllers
 import (
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 
@@ -96,7 +97,7 @@ func Login(c *gin.Context) {
 func AutoLogin(c *gin.Context) {
 	token := middleware.ExtractToken(c.GetHeader("Authorization"))
 	payload, err := utils.VerifyAccessToken(token)
-	if err != nil && err.Error() == "token expired" {
+	if err != nil && strings.Contains(err.Error(), "expired") {
 		c.JSON(http.StatusUnauthorized, gin.H{"data": err.Error()})
 		return
 	}
