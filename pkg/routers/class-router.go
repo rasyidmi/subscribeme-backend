@@ -8,4 +8,5 @@ import (
 
 func Class(g *gin.RouterGroup) {
 	g.GET("/:id", controllers.GetClassByID)
+	g.POST("/subscribe/:id", controllers.Subscribe)
 }

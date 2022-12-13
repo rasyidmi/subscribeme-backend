@@ -9,6 +9,7 @@ import (
 
 type ClassModel interface {
 	GetClassByID(id int) (modelsConfig.ClassResponse, error)
+	Subscribe(id int, userId string) error
 }
 
 type classModel struct {
@@ -44,4 +45,26 @@ func (r *classModel) GetClassByID(id int) (modelsConfig.ClassResponse, error) {
 	}
 
 	return classResponse, err
+}
+
+func (r *classModel) Subscribe(id int, userId string) error {
+	var user modelsConfig.User
+	var class modelsConfig.Class
+	err := r.DB.Debug().Where("id = ?", userId).First(&user).Error
+	if err != nil {
+		fmt.Println(err)
+		fmt.Println("ERROR OCCURED: Error when finding the user.")
+	}
+	err = r.DB.Debug().Where("id = ?", id).First(&class).Error
+	if err != nil {
+		fmt.Println(err)
+		fmt.Println("ERROR OCCURED: Error when finding the class.")
+	}
+
+	err = r.DB.Debug().Model(&class).Association("Users").Append(&user)
+	if err != nil {
+		fmt.Println(err)
+		fmt.Println("ERROR OCCURED: Error when subscribing.")
+	}
+	return err
 }
