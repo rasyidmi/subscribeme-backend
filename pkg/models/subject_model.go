@@ -3,28 +3,29 @@ package models
 import (
 	"fmt"
 	modelsConfig "projects-subscribeme-backend/pkg/config/models"
+	subjectDTO "projects-subscribeme-backend/pkg/utils/dto"
 
 	"gorm.io/gorm"
 )
 
-type SubjectRepository interface {
-	GetAll() ([]modelsConfig.SubjectResponse, error)
+type SubjectModel interface {
+	GetAll() ([]subjectDTO.SubjectResponse, error)
 	Create(subject modelsConfig.Subject, classes []map[string]string) error
 	FindByID(id int) (modelsConfig.Subject, error)
-	UpdateByID(id int, newData map[string]interface{}) error
+	UpdateByID(id int, newData subjectDTO.SubjectRequest) error
 	DeleteByID(id int) error
 }
 
-type subjectRepository struct {
+type subjectModel struct {
 	DB *gorm.DB
 }
 
-func CreateSubjectRepository(DB *gorm.DB) *subjectRepository {
-	return &subjectRepository{DB}
+func CreateSubjectRepository(DB *gorm.DB) *subjectModel {
+	return &subjectModel{DB}
 }
 
-func (r *subjectRepository) GetAll() ([]modelsConfig.SubjectResponse, error) {
-	var subjects []modelsConfig.SubjectResponse
+func (r *subjectModel) GetAll() ([]subjectDTO.SubjectResponse, error) {
+	var subjects []subjectDTO.SubjectResponse
 	err := r.DB.Order("Title").Model(&modelsConfig.Subject{}).Find(&subjects).Error
 	if err != nil {
 		fmt.Printf("ERROR OCCURED: %s", err)
@@ -32,7 +33,7 @@ func (r *subjectRepository) GetAll() ([]modelsConfig.SubjectResponse, error) {
 	return subjects, err
 }
 
-func (r *subjectRepository) Create(subject modelsConfig.Subject, classes []map[string]string) error {
+func (r *subjectModel) Create(subject modelsConfig.Subject, classes []map[string]string) error {
 	err := r.DB.Create(&subject).Error
 	if err != nil {
 		fmt.Printf("ERROR OCCURED: %s", err)
@@ -53,10 +54,10 @@ func (r *subjectRepository) Create(subject modelsConfig.Subject, classes []map[s
 	return err
 }
 
-func (r *subjectRepository) FindByID(id int) (modelsConfig.Subject, error) {
+func (r *subjectModel) FindByID(id int) (modelsConfig.Subject, error) {
 	// Finding the subject
 	var subject modelsConfig.Subject
-	err := r.DB.Debug().Find(&subject, id).Error
+	err := r.DB.Debug().First(&subject, id).Error
 	if err != nil {
 		fmt.Println("ERROR OCCURED: Error when finding the subject.")
 		return subject, err
@@ -75,18 +76,17 @@ func (r *subjectRepository) FindByID(id int) (modelsConfig.Subject, error) {
 	return subject, err
 }
 
-func (r *subjectRepository) UpdateByID(id int, newData map[string]interface{}) error {
+func (r *subjectModel) UpdateByID(id int, newData subjectDTO.SubjectRequest) error {
 	subject, err := r.FindByID(id)
 	if err != nil {
 		fmt.Println("ERROR OCCURED: Error when finding the subject.")
 		return err
 	}
-
-	err = r.DB.Model(&subject).Updates(newData).Error
+	err = r.DB.Model(&subject).Where("").Updates(newData).Error
 	return err
 }
 
-func (r *subjectRepository) DeleteByID(id int) error {
+func (r *subjectModel) DeleteByID(id int) error {
 	err := r.DB.Debug().Delete(&modelsConfig.Subject{}, id).Error
 	if err != nil {
 		fmt.Println("ERROR OCCURED: Error when deleting the subject.")

@@ -133,6 +133,7 @@ func RefreshToken(c *gin.Context) {
 	payload, err := utils.VerifyRefreshToken(refreshToken)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"data": err.Error()})
+		return
 	}
 	user, err := userModel.FindByID(payload.UserId)
 	if err != nil {

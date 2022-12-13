@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	modelsConfig "projects-subscribeme-backend/pkg/config/models"
+	"projects-subscribeme-backend/pkg/middleware"
 	"projects-subscribeme-backend/pkg/service"
 	"strconv"
 
@@ -19,13 +20,13 @@ func CreateEventController(service service.EventService) {
 
 // CREATE /agenda
 func CreateEvent(c *gin.Context) {
-	// err := middleware.AuthMiddleware(c)
-	// if err != nil {
-	// 	return
-	// }
+	err := middleware.AuthMiddleware(c)
+	if err != nil {
+		return
+	}
 	var eventRequest modelsConfig.EventDTO
 
-	err := c.ShouldBindJSON(&eventRequest)
+	err = c.ShouldBindJSON(&eventRequest)
 	if err != nil {
 		fmt.Println("ERROR OCCURED: Error on converting json to model")
 		c.JSON(http.StatusBadRequest, gin.H{"data": err.Error()})
@@ -44,10 +45,10 @@ func CreateEvent(c *gin.Context) {
 
 // GET /agenda/id
 func GetEventByID(c *gin.Context) {
-	// err := middleware.AuthMiddleware(c)
-	// if err != nil {
-	// 	return
-	// }
+	err := middleware.AuthMiddleware(c)
+	if err != nil {
+		return
+	}
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		fmt.Println("ERROR OCCURED: Error on converting string to int")
@@ -66,10 +67,10 @@ func GetEventByID(c *gin.Context) {
 
 // POST /agenda/id
 func UpdateEventByID(c *gin.Context) {
-	// err := middleware.AuthMiddleware(c)
-	// if err != nil {
-	// 	return
-	// }
+	err := middleware.AuthMiddleware(c)
+	if err != nil {
+		return
+	}
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		fmt.Println("ERROR OCCURED: Error on converting string to int")
@@ -94,10 +95,10 @@ func UpdateEventByID(c *gin.Context) {
 
 // DELETE /agenda/id
 func DeleteEventByID(c *gin.Context) {
-	// err := middleware.AuthMiddleware(c)
-	// if err != nil {
-	// 	return
-	// }
+	err := middleware.AuthMiddleware(c)
+	if err != nil {
+		return
+	}
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		fmt.Println("ERROR OCCURED: Error on converting string to int")

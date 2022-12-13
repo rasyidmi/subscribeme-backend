@@ -17,11 +17,10 @@ import (
 
 var DB *gorm.DB
 
-var subjectServ service.SubjectService
 var classServ service.ClassService
 var eventServ service.EventService
 
-var subjectRepo models.SubjectRepository
+var subjectModel models.SubjectModel
 var classRepo models.ClassRepository
 var eventRepo models.EventRepository
 var userModel models.UserModel
@@ -60,20 +59,19 @@ func connectDatabase() {
 }
 
 func createRepositories() {
-	subjectRepo = models.CreateSubjectRepository(DB)
+	subjectModel = models.CreateSubjectRepository(DB)
 	classRepo = models.CreateClassRepository(DB)
 	eventRepo = models.CreateEventRepository(DB)
 	userModel = models.CreateUserModel(DB)
 }
 
 func createServices() {
-	subjectServ = service.CreateSubjectService(subjectRepo)
 	classServ = service.CreateClassService(classRepo)
 	eventServ = service.CreateEventService(eventRepo)
 }
 
 func createControllers() {
-	controllers.CreateSubjectController(subjectServ)
+	controllers.CreateSubjectController(subjectModel)
 	controllers.CreateClassController(classServ)
 	controllers.CreateEventController(eventServ)
 	controllers.CreateUserController(userModel)
