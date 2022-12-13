@@ -3,17 +3,17 @@ package controllers
 import (
 	"fmt"
 	"net/http"
-	"projects-subscribeme-backend/pkg/service"
+	"projects-subscribeme-backend/pkg/models"
 	"projects-subscribeme-backend/pkg/utils"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
 
-var classService service.ClassService
+var classModel models.ClassModel
 
-func CreateClassController(service service.ClassService) {
-	classService = service
+func CreateClassController(model models.ClassModel) {
+	classModel = model
 }
 
 // GET /kelas/:id
@@ -29,7 +29,7 @@ func GetClassByID(c *gin.Context) {
 		return
 	}
 
-	class, err := classService.GetClassByID(id)
+	class, err := classModel.GetClassByID(id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"data": err.Error()})
 		return

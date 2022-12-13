@@ -7,19 +7,19 @@ import (
 	"gorm.io/gorm"
 )
 
-type ClassRepository interface {
+type ClassModel interface {
 	GetClassByID(id int) (modelsConfig.ClassResponse, error)
 }
 
-type classRepository struct {
+type classModel struct {
 	DB *gorm.DB
 }
 
-func CreateClassRepository(DB *gorm.DB) *classRepository {
-	return &classRepository{DB}
+func CreateClassRepository(DB *gorm.DB) *classModel {
+	return &classModel{DB}
 }
 
-func (r *classRepository) GetClassByID(id int) (modelsConfig.ClassResponse, error) {
+func (r *classModel) GetClassByID(id int) (modelsConfig.ClassResponse, error) {
 	var class modelsConfig.Class
 	var classResponse modelsConfig.ClassResponse
 	err := r.DB.Debug().Model(&modelsConfig.Class{}).Find(&class, id).Error
