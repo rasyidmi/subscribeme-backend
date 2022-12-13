@@ -23,7 +23,7 @@ func CreateClassRepository(DB *gorm.DB) *classModel {
 func (r *classModel) GetClassByID(id int) (modelsConfig.ClassResponse, error) {
 	var class modelsConfig.Class
 	var classResponse modelsConfig.ClassResponse
-	err := r.DB.Debug().Model(&modelsConfig.Class{}).Find(&class, id).Error
+	err := r.DB.Debug().Model(&modelsConfig.Class{}).First(&class, id).Error
 	if err != nil {
 		fmt.Println("ERROR OCCURED: Error when finding the class.")
 		return classResponse, err

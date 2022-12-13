@@ -46,7 +46,7 @@ func (r *eventRepository) Create(event modelsConfig.Event, classsesID []int) err
 
 func (r *eventRepository) FindByID(id int) (modelsConfig.EventResponse, error) {
 	var event modelsConfig.EventResponse
-	err := r.DB.Debug().Model(&modelsConfig.Event{}).Find(&event, id).Error
+	err := r.DB.Debug().Model(&modelsConfig.Event{}).First(&event, id).Error
 	if err != nil {
 		fmt.Println("ERROR OCCURED: Error when finding the subject.")
 		return event, err
