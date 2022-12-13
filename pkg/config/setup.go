@@ -7,7 +7,6 @@ import (
 	modelsConfig "projects-subscribeme-backend/pkg/config/models"
 	"projects-subscribeme-backend/pkg/controllers"
 	"projects-subscribeme-backend/pkg/models"
-	"projects-subscribeme-backend/pkg/service"
 
 	"github.com/joho/godotenv"
 
@@ -17,17 +16,14 @@ import (
 
 var DB *gorm.DB
 
-var eventServ service.EventService
-
 var subjectModel models.SubjectModel
 var classModel models.ClassModel
-var eventRepo models.EventRepository
+var eventModel models.EventRepository
 var userModel models.UserModel
 
 func SetupDatabase() {
 	connectDatabase()
 	createRepositories()
-	createServices()
 	createControllers()
 }
 
@@ -60,17 +56,13 @@ func connectDatabase() {
 func createRepositories() {
 	subjectModel = models.CreateSubjectRepository(DB)
 	classModel = models.CreateClassRepository(DB)
-	eventRepo = models.CreateEventRepository(DB)
+	eventModel = models.CreateEventRepository(DB)
 	userModel = models.CreateUserModel(DB)
-}
-
-func createServices() {
-	eventServ = service.CreateEventService(eventRepo)
 }
 
 func createControllers() {
 	controllers.CreateSubjectController(subjectModel)
 	controllers.CreateClassController(classModel)
-	controllers.CreateEventController(eventServ)
+	controllers.CreateEventController(eventModel)
 	controllers.CreateUserController(userModel)
 }

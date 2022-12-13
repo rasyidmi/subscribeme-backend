@@ -6,16 +6,16 @@ import (
 	"net/http"
 	modelsConfig "projects-subscribeme-backend/pkg/config/models"
 	"projects-subscribeme-backend/pkg/middleware"
-	"projects-subscribeme-backend/pkg/service"
+	"projects-subscribeme-backend/pkg/models"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
 
-var eventService service.EventService
+var eventModel models.EventRepository
 
-func CreateEventController(service service.EventService) {
-	eventService = service
+func CreateEventController(model models.EventRepository) {
+	eventModel = model
 }
 
 // CREATE /agenda
@@ -33,7 +33,17 @@ func CreateEvent(c *gin.Context) {
 		return
 	}
 
-	err = eventService.Create(eventRequest)
+	var classesID []int
+	classesID = append(classesID, eventRequest.ClassesID...)
+
+	event := modelsConfig.Event{
+		Title:        eventRequest.Title,
+		Description:  eventRequest.Description,
+		DeadlineDate: eventRequest.DeadlineDate,
+		SubjectID:    eventRequest.SubjectID,
+	}
+
+	err = eventModel.Create(event, classesID)
 	if err != nil {
 		log.Println("ERROR HERE")
 		c.JSON(http.StatusInternalServerError, gin.H{"data": err.Error()})
@@ -56,7 +66,7 @@ func GetEventByID(c *gin.Context) {
 		return
 	}
 
-	event, err := eventService.FindByID(id)
+	event, err := eventModel.FindByID(id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"data": err.Error()})
 		return
@@ -85,7 +95,15 @@ func UpdateEventByID(c *gin.Context) {
 		return
 	}
 
-	err = eventService.UpdateByID(id, eventRequest)
+	data := map[string]interface{}{
+		"title":         eventRequest.Title,
+		"description":   eventRequest.Description,
+		"deadline_date": eventRequest.DeadlineDate,
+		"subject_id":    eventRequest.SubjectID,
+		"subject_name":  eventRequest.SubjectName,
+	}
+
+	err = eventModel.UpdateByID(id, data)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"data": err.Error()})
 		return
@@ -106,7 +124,7 @@ func DeleteEventByID(c *gin.Context) {
 		return
 	}
 
-	err = eventService.DeleteByID(id)
+	err = eventModel.DeleteByID(id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"data": err.Error()})
 		return
