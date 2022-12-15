@@ -8,7 +8,7 @@ import (
 )
 
 type ClassModel interface {
-	GetClassByID(id int) (modelsConfig.ClassResponse, error)
+	GetClassByID(id int, userId string) (modelsConfig.ClassResponse, error)
 	Subscribe(id int, userId string) error
 }
 
@@ -20,28 +20,28 @@ func CreateClassRepository(DB *gorm.DB) *classModel {
 	return &classModel{DB}
 }
 
-func (r *classModel) GetClassByID(id int) (modelsConfig.ClassResponse, error) {
+func (r *classModel) GetClassByID(id int, userId string) (modelsConfig.ClassResponse, error) {
 	var class modelsConfig.Class
 	var classResponse modelsConfig.ClassResponse
-	err := r.DB.Debug().Model(&modelsConfig.Class{}).First(&class, id).Error
+	err := r.DB.Debug().Preload("Events").Preload("Users", "id = ?", userId).First(&class, id).Error
 	if err != nil {
-		fmt.Println("ERROR OCCURED: Error when finding the class.")
+		fmt.Println("ERROR OCCURED: Error when finding the association.")
 		return classResponse, err
 	}
-
-	// Finding the class's events
-	var events []*modelsConfig.EventResponse
-	err = r.DB.Debug().Model(&class).Where("class_id = ?", id).Association("Events").Find(&events)
-	if err != nil {
-		fmt.Println("ERROR OCCURED: Error when finding the class's events.")
-		return classResponse, err
+	// Check if the user is subscribing the class.
+	isSubscribe := false
+	fmt.Println("LEEEN")
+	fmt.Println(&class)
+	fmt.Println(len(class.Users))
+	if len(class.Users) != 0 {
+		isSubscribe = true
 	}
-
 	// Convert Class object to ClassResponse
 	classResponse = modelsConfig.ClassResponse{
-		ID:     class.ID,
-		Title:  class.Title,
-		Events: events,
+		ID:          class.ID,
+		Title:       class.Title,
+		Events:      class.Events,
+		IsSubscribe: isSubscribe,
 	}
 
 	return classResponse, err

@@ -9,7 +9,8 @@ type Class struct {
 }
 
 type ClassResponse struct {
-	ID     int
-	Title  string
-	Events []*EventResponse
+	ID          int
+	Title       string
+	Events      []*Event
+	IsSubscribe bool
 }

@@ -29,8 +29,9 @@ func GetClassByID(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"data": "Error on converting string to int"})
 		return
 	}
+	userId := c.Request.Header.Get("userId")
 
-	class, err := classModel.GetClassByID(id)
+	class, err := classModel.GetClassByID(id, userId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"data": err.Error()})
 		return

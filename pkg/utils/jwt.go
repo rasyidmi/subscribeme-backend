@@ -21,7 +21,7 @@ type RefreshClaim struct {
 
 func GenerateAccessToken(userId uuid.UUID, role string) (string, error) {
 	secretKey := []byte(os.Getenv("JWT_SECRET"))
-	expirationTime := time.Now().Add(15 * time.Minute)
+	expirationTime := time.Now().Add(30 * time.Minute)
 	claims := &JWTClaim{
 		UserId: userId.String(),
 		Role:   role,
