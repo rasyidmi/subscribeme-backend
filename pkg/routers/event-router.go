@@ -7,6 +7,7 @@ import (
 )
 
 func Event(g *gin.RouterGroup) {
+	g.GET("/today-deadline", controllers.GetTodayDeadline)
 	g.GET("/:id", controllers.GetEventByID)
 	g.POST("/create", controllers.CreateEvent)
 	g.PUT("/update/:id", controllers.UpdateEventByID)

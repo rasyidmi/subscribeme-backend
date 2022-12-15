@@ -4,6 +4,7 @@ import (
 	"fmt"
 	modelsConfig "projects-subscribeme-backend/pkg/config/models"
 	"projects-subscribeme-backend/pkg/utils"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -13,6 +14,7 @@ type EventRepository interface {
 	DeleteByID(id int) error
 	FindByID(id int) (modelsConfig.EventResponse, error)
 	UpdateByID(id int, newData map[string]interface{}) error
+	GetTodayDeadline(userId string) ([]modelsConfig.StudentEvent, error)
 }
 
 type eventRepository struct {
@@ -76,4 +78,20 @@ func (r *eventRepository) UpdateByID(id int, newData map[string]interface{}) err
 
 	err = r.DB.Model(&modelsConfig.Event{}).Where("id = ?", id).Updates(newData).Error
 	return err
+}
+
+func (r *eventRepository) GetTodayDeadline(userId string) ([]modelsConfig.StudentEvent, error) {
+	currentTime := time.Now()
+	currentDate := time.Date(currentTime.Year(), currentTime.Month(), currentTime.Day(),
+		0, 0, 0, 0, currentTime.Location())
+	endOfDate := time.Date(currentTime.Year(), currentTime.Month(), currentTime.Day(),
+		24, 0, 0, 0, currentTime.Location())
+	events := []modelsConfig.StudentEvent{}
+	err := r.DB.Debug().Model(modelsConfig.StudentEvent{}).Where("user_id = ?", userId).
+		Where("deadline_date < ?", endOfDate).Where("deadline_date >= ?", currentDate).Find(&events).Error
+	if err != nil {
+		fmt.Println("ERROR OCCURED: Error when finding the events.")
+		return nil, err
+	}
+	return events, err
 }

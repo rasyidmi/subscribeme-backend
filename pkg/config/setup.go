@@ -23,7 +23,7 @@ var userModel models.UserModel
 
 func SetupDatabase() {
 	connectDatabase()
-	createRepositories()
+	createModels()
 	createControllers()
 }
 
@@ -48,12 +48,12 @@ func connectDatabase() {
 		log.Fatal("error on db setup")
 		log.Fatal("!!!!!!!!!!!!!!!!!")
 	}
-	db.AutoMigrate(&modelsConfig.Subject{}, &modelsConfig.Class{}, &modelsConfig.Event{}, &modelsConfig.User{})
+	db.AutoMigrate(&modelsConfig.Subject{}, &modelsConfig.Class{}, &modelsConfig.Event{}, &modelsConfig.User{}, &modelsConfig.StudentEvent{})
 
 	DB = db
 }
 
-func createRepositories() {
+func createModels() {
 	subjectModel = models.CreateSubjectRepository(DB)
 	classModel = models.CreateClassRepository(DB)
 	eventModel = models.CreateEventRepository(DB)

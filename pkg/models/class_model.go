@@ -30,9 +30,6 @@ func (r *classModel) GetClassByID(id int, userId string) (modelsConfig.ClassResp
 	}
 	// Check if the user is subscribing the class.
 	isSubscribe := false
-	fmt.Println("LEEEN")
-	fmt.Println(&class)
-	fmt.Println(len(class.Users))
 	if len(class.Users) != 0 {
 		isSubscribe = true
 	}
@@ -50,21 +47,39 @@ func (r *classModel) GetClassByID(id int, userId string) (modelsConfig.ClassResp
 func (r *classModel) Subscribe(id int, userId string) error {
 	var user modelsConfig.User
 	var class modelsConfig.Class
+	// Load the user.
 	err := r.DB.Debug().Where("id = ?", userId).First(&user).Error
 	if err != nil {
 		fmt.Println(err)
 		fmt.Println("ERROR OCCURED: Error when finding the user.")
 	}
-	err = r.DB.Debug().Where("id = ?", id).First(&class).Error
+	// Load the class.
+	err = r.DB.Debug().Preload("Events").First(&class, id).Error
 	if err != nil {
 		fmt.Println(err)
 		fmt.Println("ERROR OCCURED: Error when finding the class.")
 	}
-
+	// Connect student with class's events.
+	for i := 0; i < len(class.Events); i++ {
+		studentEvent := modelsConfig.StudentEvent{
+			UserID:       user.ID,
+			EventID:      class.Events[i].ID,
+			ClassName:    class.Title,
+			EventName:    class.Events[i].Title,
+			SubjectName:  class.Events[i].SubjectName,
+			DeadlineDate: class.Events[i].DeadlineDate,
+		}
+		err = r.DB.Debug().Model(modelsConfig.StudentEvent{}).Create(&studentEvent).Error
+		if err != nil {
+			fmt.Println(err)
+			fmt.Println("ERROR OCCURED: when adding class event.")
+		}
+	}
 	err = r.DB.Debug().Model(&class).Association("Users").Append(&user)
 	if err != nil {
 		fmt.Println(err)
 		fmt.Println("ERROR OCCURED: Error when subscribing.")
 	}
+
 	return err
 }

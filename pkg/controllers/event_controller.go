@@ -41,6 +41,7 @@ func CreateEvent(c *gin.Context) {
 		Description:  eventRequest.Description,
 		DeadlineDate: eventRequest.DeadlineDate,
 		SubjectID:    eventRequest.SubjectID,
+		SubjectName:  eventRequest.SubjectName,
 	}
 
 	err = eventModel.Create(event, classesID)
@@ -130,4 +131,17 @@ func DeleteEventByID(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"data": "Delete success."})
+}
+
+func GetTodayDeadline(c *gin.Context) {
+	err := middleware.AuthMiddleware(c)
+	if err != nil {
+		return
+	}
+	userId := c.Request.Header.Get("userId")
+	events, err := eventModel.GetTodayDeadline(userId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"data": err.Error()})
+	}
+	c.JSON(http.StatusOK, gin.H{"data": events})
 }
