@@ -9,7 +9,7 @@ import (
 	"gorm.io/gorm"
 )
 
-type EventRepository interface {
+type EventModel interface {
 	Create(event modelsConfig.Event, classsesID []int) error
 	DeleteByID(id int) error
 	FindByID(id int) (modelsConfig.EventResponse, error)
@@ -17,15 +17,15 @@ type EventRepository interface {
 	GetTodayDeadline(userId string) ([]modelsConfig.StudentEvent, error)
 }
 
-type eventRepository struct {
+type eventModel struct {
 	DB *gorm.DB
 }
 
-func CreateEventRepository(DB *gorm.DB) *eventRepository {
-	return &eventRepository{DB}
+func CreateEventRepository(DB *gorm.DB) *eventModel {
+	return &eventModel{DB}
 }
 
-func (r *eventRepository) Create(event modelsConfig.Event, classsesID []int) error {
+func (r *eventModel) Create(event modelsConfig.Event, classsesID []int) error {
 	err := r.DB.Debug().Create(&event).Error
 	if err != nil {
 		fmt.Printf("ERROR OCCURED: when crating the event.")
@@ -41,12 +41,13 @@ func (r *eventRepository) Create(event modelsConfig.Event, classsesID []int) err
 			studentEvent := modelsConfig.StudentEvent{
 				UserID:       classes[i].Users[j].ID,
 				EventID:      event.ID,
+				SubjectID:    event.SubjectID,
 				ClassName:    classes[i].Title,
 				EventName:    event.Title,
 				SubjectName:  event.SubjectName,
 				DeadlineDate: event.DeadlineDate,
 			}
-			err = r.DB.Debug().Model(modelsConfig.StudentEvent{}).Create(&studentEvent).Error
+			err = r.DB.Debug().Model(&modelsConfig.StudentEvent{}).Create(&studentEvent).Error
 			if err != nil {
 				fmt.Printf("ERROR OCCURED: when connecting the event with students.")
 				return err
@@ -56,7 +57,7 @@ func (r *eventRepository) Create(event modelsConfig.Event, classsesID []int) err
 	return err
 }
 
-func (r *eventRepository) FindByID(id int) (modelsConfig.EventResponse, error) {
+func (r *eventModel) FindByID(id int) (modelsConfig.EventResponse, error) {
 	var event modelsConfig.EventResponse
 	err := r.DB.Debug().Model(&modelsConfig.Event{}).First(&event, id).Error
 	if err != nil {
@@ -67,15 +68,21 @@ func (r *eventRepository) FindByID(id int) (modelsConfig.EventResponse, error) {
 	return event, err
 }
 
-func (r *eventRepository) DeleteByID(id int) error {
+func (r *eventModel) DeleteByID(id int) error {
 	err := r.DB.Delete(&modelsConfig.Event{}, id).Error
 	if err != nil {
 		fmt.Println("ERROR OCCURED: Error when deleting the event.")
+		return err
+	}
+	err = r.DB.Where("event_id = ?", id).Delete(&modelsConfig.StudentEvent{}).Error
+	if err != nil {
+		fmt.Println("ERROR OCCURED: Error when deleting the student event.")
+		return err
 	}
 	return err
 }
 
-func (r *eventRepository) UpdateByID(id int, newData map[string]interface{}) error {
+func (r *eventModel) UpdateByID(id int, newData map[string]interface{}) error {
 	event, err := r.FindByID(id)
 	if err != nil {
 		fmt.Println("ERROR OCCURED: Error when finding the subject.")
@@ -90,14 +97,14 @@ func (r *eventRepository) UpdateByID(id int, newData map[string]interface{}) err
 	return err
 }
 
-func (r *eventRepository) GetTodayDeadline(userId string) ([]modelsConfig.StudentEvent, error) {
+func (r *eventModel) GetTodayDeadline(userId string) ([]modelsConfig.StudentEvent, error) {
 	currentTime := time.Now()
 	currentDate := time.Date(currentTime.Year(), currentTime.Month(), currentTime.Day(),
 		0, 0, 0, 0, currentTime.Location())
 	endOfDate := time.Date(currentTime.Year(), currentTime.Month(), currentTime.Day(),
 		24, 0, 0, 0, currentTime.Location())
 	events := []modelsConfig.StudentEvent{}
-	err := r.DB.Debug().Model(modelsConfig.StudentEvent{}).Where("user_id = ?", userId).
+	err := r.DB.Debug().Model(&modelsConfig.StudentEvent{}).Order("deadline_date asc").Where("user_id = ?", userId).
 		Where("deadline_date < ?", endOfDate).Where("deadline_date >= ?", currentDate).Find(&events).Error
 	if err != nil {
 		fmt.Println("ERROR OCCURED: Error when finding the events.")

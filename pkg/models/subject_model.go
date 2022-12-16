@@ -90,6 +90,13 @@ func (r *subjectModel) DeleteByID(id int) error {
 	err := r.DB.Debug().Delete(&modelsConfig.Subject{}, id).Error
 	if err != nil {
 		fmt.Println("ERROR OCCURED: Error when deleting the subject.")
+		return err
+	}
+	// Delete student events related to the subject.
+	err = r.DB.Debug().Where("subject_id = ?", id).Delete(&modelsConfig.StudentEvent{}).Error
+	if err != nil {
+		fmt.Println("ERROR OCCURED: Error when deleting the student event.")
+		return err
 	}
 	return err
 }

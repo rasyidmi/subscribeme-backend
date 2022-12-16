@@ -18,7 +18,7 @@ var DB *gorm.DB
 
 var subjectModel models.SubjectModel
 var classModel models.ClassModel
-var eventModel models.EventRepository
+var eventModel models.EventModel
 var userModel models.UserModel
 
 func SetupDatabase() {

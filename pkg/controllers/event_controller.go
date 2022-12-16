@@ -12,9 +12,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var eventModel models.EventRepository
+var eventModel models.EventModel
 
-func CreateEventController(model models.EventRepository) {
+func CreateEventController(model models.EventModel) {
 	eventModel = model
 }
 

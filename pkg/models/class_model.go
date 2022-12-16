@@ -64,12 +64,13 @@ func (r *classModel) Subscribe(id int, userId string) error {
 		studentEvent := modelsConfig.StudentEvent{
 			UserID:       user.ID,
 			EventID:      class.Events[i].ID,
+			SubjectID:    class.SubjectID,
 			ClassName:    class.Title,
 			EventName:    class.Events[i].Title,
 			SubjectName:  class.Events[i].SubjectName,
 			DeadlineDate: class.Events[i].DeadlineDate,
 		}
-		err = r.DB.Debug().Model(modelsConfig.StudentEvent{}).Create(&studentEvent).Error
+		err = r.DB.Debug().Model(&modelsConfig.StudentEvent{}).Create(&studentEvent).Error
 		if err != nil {
 			fmt.Println(err)
 			fmt.Println("ERROR OCCURED: when adding class event.")
