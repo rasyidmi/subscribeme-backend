@@ -15,6 +15,7 @@ type EventModel interface {
 	FindByID(id int) (modelsConfig.EventResponse, error)
 	UpdateByID(id int, newData map[string]interface{}) error
 	GetTodayDeadline(userId string) ([]modelsConfig.StudentEvent, error)
+	GetSevenDayDeadline(userId string) ([]modelsConfig.StudentEvent, error)
 }
 
 type eventModel struct {
@@ -106,6 +107,22 @@ func (r *eventModel) GetTodayDeadline(userId string) ([]modelsConfig.StudentEven
 	events := []modelsConfig.StudentEvent{}
 	err := r.DB.Debug().Model(&modelsConfig.StudentEvent{}).Order("deadline_date asc").Where("user_id = ?", userId).
 		Where("deadline_date < ?", endOfDate).Where("deadline_date >= ?", currentDate).Find(&events).Error
+	if err != nil {
+		fmt.Println("ERROR OCCURED: Error when finding the events.")
+		return nil, err
+	}
+	return events, err
+}
+
+func (r *eventModel) GetSevenDayDeadline(userId string) ([]modelsConfig.StudentEvent, error) {
+	tomorrowTime := time.Now().AddDate(0, 0, 1)
+	startTime := time.Date(tomorrowTime.Year(), tomorrowTime.Month(), tomorrowTime.Day(),
+		0, 0, 0, 0, tomorrowTime.Location())
+	endTime := time.Date(tomorrowTime.Year(), tomorrowTime.Month(), tomorrowTime.Day()+6,
+		24, 0, 0, 0, tomorrowTime.Location())
+	events := []modelsConfig.StudentEvent{}
+	err := r.DB.Debug().Model(&modelsConfig.StudentEvent{}).Order("deadline_date asc").Where("user_id = ?", userId).
+		Where("deadline_date < ?", endTime).Where("deadline_date >= ?", startTime).Find(&events).Error
 	if err != nil {
 		fmt.Println("ERROR OCCURED: Error when finding the events.")
 		return nil, err

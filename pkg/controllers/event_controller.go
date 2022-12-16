@@ -145,3 +145,16 @@ func GetTodayDeadline(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{"data": events})
 }
+
+func GetSevenDayDeadline(c *gin.Context) {
+	err := middleware.AuthMiddleware(c)
+	if err != nil {
+		return
+	}
+	userId := c.Request.Header.Get("userId")
+	events, err := eventModel.GetSevenDayDeadline(userId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"data": err.Error()})
+	}
+	c.JSON(http.StatusOK, gin.H{"data": events})
+}
