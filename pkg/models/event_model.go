@@ -27,19 +27,29 @@ func CreateEventRepository(DB *gorm.DB) *eventRepository {
 
 func (r *eventRepository) Create(event modelsConfig.Event, classsesID []int) error {
 	err := r.DB.Debug().Create(&event).Error
-	// var err error
-	fmt.Println(event)
-	for _, classID := range classsesID {
-		var class modelsConfig.Class
-		err = r.DB.Debug().Table("classes").Where("ID = ?", classID).Find(&class).Error
-		fmt.Println(class)
-		if err != nil {
-			fmt.Printf("ERROR OCCURED: %s", err)
-			break
-		} else {
-			err = r.DB.Debug().Model(&event).Association("Classes").Append(&class)
+	if err != nil {
+		fmt.Printf("ERROR OCCURED: when crating the event.")
+		return err
+	}
+	var classes []modelsConfig.Class
+	err = r.DB.Debug().Preload("Users").Find(&classes, classsesID).Error
+	for i := 0; i < len(classes); i++ {
+		// Connect event and class.
+		err = r.DB.Debug().Model(&event).Association("Classes").Append(&classes[i])
+		// Connect event and student.
+		for j := 0; j < len(classes[i].Users); j++ {
+			studentEvent := modelsConfig.StudentEvent{
+				UserID:       classes[i].Users[j].ID,
+				EventID:      event.ID,
+				ClassName:    classes[i].Title,
+				EventName:    event.Title,
+				SubjectName:  event.SubjectName,
+				DeadlineDate: event.DeadlineDate,
+			}
+			err = r.DB.Debug().Model(modelsConfig.StudentEvent{}).Create(&studentEvent).Error
 			if err != nil {
-				fmt.Printf("ERROR OCCURED: %s", err)
+				fmt.Printf("ERROR OCCURED: when connecting the event with students.")
+				return err
 			}
 		}
 	}
