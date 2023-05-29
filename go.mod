@@ -4,6 +4,8 @@ go 1.18
 
 require gorm.io/driver/postgres v1.3.4
 
+require github.com/jinzhu/copier v0.3.5 // indirect
+
 require (
 	cloud.google.com/go v0.100.2 // indirect
 	cloud.google.com/go/compute v1.5.0 // indirect
@@ -12,6 +14,8 @@ require (
 	cloud.google.com/go/storage v1.21.0 // indirect
 	firebase.google.com/go v3.13.0+incompatible // indirect
 	firebase.google.com/go/v4 v4.8.0 // indirect
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/gin-contrib/cors v1.4.0
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/gin-gonic/gin v1.8.1 // indirect
 	github.com/go-playground/locales v0.14.0 // indirect
