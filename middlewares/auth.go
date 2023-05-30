@@ -4,7 +4,7 @@ import (
 	"errors"
 	"net/http"
 	"projects-subscribeme-backend/dto/response"
-	"projects-subscribeme-backend/utils"
+	"projects-subscribeme-backend/helper"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -27,7 +27,7 @@ func Auth(role string) gin.HandlerFunc {
 			context.Abort()
 			return
 		}
-		claims, err := utils.ValidateToken(tokenString, role)
+		claims, err := helper.ValidateToken(tokenString, role)
 		if err != nil {
 			response.Error(context, "failed", http.StatusUnauthorized, err)
 			context.Abort()

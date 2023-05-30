@@ -2,18 +2,15 @@ package config
 
 import (
 	"os"
-	"time"
 )
 
 type AuthConfig struct {
-	Secret   string
-	ExpHours time.Time
+	Secret string
 }
 
 func LoadAuthConfig() AuthConfig {
 
 	return AuthConfig{
-		Secret:   os.Getenv("AUTH_SECRET"),
-		ExpHours: time.Now().Add(48 * time.Hour),
+		Secret: os.Getenv("AUTH_SECRET"),
 	}
 }

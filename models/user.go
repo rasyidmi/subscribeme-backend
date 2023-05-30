@@ -10,7 +10,6 @@ import (
 type User struct {
 	ID       uuid.UUID `gorm:"primaryKey"`
 	Username string    `gorm:"unique"`
-	Email    string    `gorm:"unique"`
 	Role     constant.UserRoleEnum
 	FcmToken string `gorm:"fcm_token"`
 }

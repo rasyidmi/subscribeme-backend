@@ -4,7 +4,10 @@ go 1.18
 
 require gorm.io/driver/postgres v1.3.4
 
-require github.com/jinzhu/copier v0.3.5 // indirect
+require (
+	github.com/jinzhu/copier v0.3.5 // indirect
+	github.com/ristekoss/golang-sso-ui-jwt v0.0.0-20220526172409-fe7320a87b7d // indirect
+)
 
 require (
 	cloud.google.com/go v0.100.2 // indirect

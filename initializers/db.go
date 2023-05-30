@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"projects-subscribeme-backend/config"
+	"projects-subscribeme-backend/models"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -12,7 +13,9 @@ import (
 func connectDatabase() *gorm.DB {
 	postgresConfig := config.LoadPostgresConfig()
 
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=require TimeZone=Asia/Jakarta",
+	log.Println(postgresConfig)
+
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Asia/Jakarta",
 		postgresConfig.Host,
 		postgresConfig.User,
 		postgresConfig.Password,
@@ -21,8 +24,7 @@ func connectDatabase() *gorm.DB {
 	)
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
-		SkipDefaultTransaction: true,
-		PrepareStmt:            true,
+		PrepareStmt: true,
 	})
 
 	tx := db.Session(&gorm.Session{PrepareStmt: true})
@@ -39,7 +41,7 @@ func connectDatabase() *gorm.DB {
 
 func migrateDatabase(db *gorm.DB) {
 
-	errMigrate := db.AutoMigrate()
+	errMigrate := db.AutoMigrate(&models.User{})
 
 	if errMigrate != nil {
 		log.Fatal("Gagal Migrate")

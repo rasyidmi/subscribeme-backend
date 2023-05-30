@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/http"
 	"projects-subscribeme-backend/dto/response"
+	"projects-subscribeme-backend/helper"
 	"projects-subscribeme-backend/services/absensi_service"
 
 	"github.com/gin-gonic/gin"
@@ -18,7 +19,8 @@ func NewAbsensiController(service absensi_service.AbsensiService) AbsensiControl
 }
 
 func (c *absensiController) GetClassScheduleByNpmMahasiswa(ctx *gin.Context) {
-	data, err := c.service.GetClassScheduleByNpmMahasiswa("1906305820")
+	claims := helper.GetTokenClaims(ctx)
+	data, err := c.service.GetClassScheduleByNpmMahasiswa(claims.Npm)
 	if err != nil {
 		if err.Error() == "404" {
 			response.Error(ctx, "failed", http.StatusNotFound, errors.New("Cant Fetch Data From SIAK-NG API"))

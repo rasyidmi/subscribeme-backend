@@ -5,7 +5,7 @@ import (
 	"projects-subscribeme-backend/constant"
 	"projects-subscribeme-backend/dto/response"
 	"projects-subscribeme-backend/models"
-	"projects-subscribeme-backend/utils"
+	"projects-subscribeme-backend/helper"
 )
 
 type absensiService struct {
@@ -30,7 +30,7 @@ func (s *absensiService) GetClassScheduleByNpmMahasiswa(npm string) (*[]response
 
 	data["term"] = "2"
 
-	models, err := utils.GetSiakngData[[]models.ClassSchedule](constant.GetClassScheduleByNpmMahasiswa, data)
+	models, err := helper.GetSiakngData[[]models.ClassSchedule](constant.GetClassScheduleByNpmMahasiswa, data)
 
 	if err != nil {
 		return nil, err
@@ -48,7 +48,7 @@ func (s *absensiService) GetClassScheduleDetailByScheduleId(scheduleId string) (
 
 	data["schedule_id"] = scheduleId
 
-	models, err := utils.GetSiakngData[models.ClassSchedule](constant.GetClassScheduleByScheduleId, data)
+	models, err := helper.GetSiakngData[models.ClassSchedule](constant.GetClassScheduleByScheduleId, data)
 
 	if err != nil {
 		return nil, err
@@ -67,7 +67,7 @@ func (s *absensiService) GetClassParticipantByClassCode(classCode string) (*[]re
 
 	data["kd_kls"] = classCode
 
-	models, err := utils.GetSiakngData[[]models.ClassDetail](constant.GetClassParticipantByClassCode, data)
+	models, err := helper.GetSiakngData[[]models.ClassDetail](constant.GetClassParticipantByClassCode, data)
 
 	if err != nil {
 		return nil, err
@@ -86,7 +86,7 @@ func (s *absensiService) GetClassScheduleByYearAndTerm(year, term string) (*[]re
 	data["year"] = year
 	data["term"] = term
 
-	models, err := utils.GetSiakngData[[]models.ClassSchedule](constant.GetClassScheduleByYearAndTerm, data)
+	models, err := helper.GetSiakngData[[]models.ClassSchedule](constant.GetClassScheduleByYearAndTerm, data)
 
 	if err != nil {
 		return nil, err
