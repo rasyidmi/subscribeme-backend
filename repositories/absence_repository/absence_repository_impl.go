@@ -1,0 +1,78 @@
+package absensi_repository
+
+import (
+	"projects-subscribeme-backend/models"
+
+	"gorm.io/gorm"
+)
+
+type absensiRepository struct {
+	db *gorm.DB
+}
+
+func NewAbsenceRepository(db *gorm.DB) AbsensiRepository {
+	return &absensiRepository{db: db}
+}
+
+func (r *absensiRepository) CreateAbsenceSession(absenceSession models.ClassAbsenceSession) (models.ClassAbsenceSession, error) {
+	err := r.db.Create(&absenceSession).Error
+
+	return absenceSession, err
+}
+
+func (r *absensiRepository) CreateAbsence(absence []models.Absence) ([]models.Absence, error) {
+	err := r.db.Create(&absence).Error
+
+	return absence, err
+
+}
+
+func (r *absensiRepository) UpdateAbsence(absence models.Absence, npm string, id string) (models.Absence, error) {
+	err := r.db.Where("student_npm = ? AND class_absence_session_id = ?", npm, id).Updates(absence).Error
+
+	if err != nil {
+		return models.Absence{}, err
+	}
+
+	return absence, err
+
+}
+
+func (r *absensiRepository) GetIsOpenAbsenceSessionByClassCodeAndEndTime(classCode string) (models.ClassAbsenceSession, error) {
+	var classAbsence models.ClassAbsenceSession
+	err := r.db.Raw("select * from class_absence_session cas where cas.end_time >= now() and cas.class_code = ?", classCode).Scan(&classAbsence).Error
+	return classAbsence, err
+}
+
+func (r *absensiRepository) GetAbsenceSessionById(id string) (models.ClassAbsenceSession, error) {
+	var absenceSession models.ClassAbsenceSession
+
+	err := r.db.First(&absenceSession, "id = ?", id).Error
+
+	return absenceSession, err
+}
+
+func (r *absensiRepository) GetAbsenceSessionByClassCode(classCode string) ([]models.ClassAbsenceSession, error) {
+	var absenceSession []models.ClassAbsenceSession
+
+	err := r.db.Find(&absenceSession, "class_code = ?", classCode).Error
+
+	return absenceSession, err
+
+}
+
+func (r *absensiRepository) GetAbsenceByClassCodeAndNpm(classCode string, npm string) ([]models.Absence, error) {
+	var absences []models.Absence
+
+	err := r.db.Raw("select a.* from absence a JOIN class_absence_session cas ON a.class_absence_session = cas.id AND cas.class_code = ? AND a.student_npm = ?", classCode, npm).Scan(&absences).Error
+
+	return absences, err
+}
+
+func (r *absensiRepository) GetAbsenceByAbsenceSessionId(id string) ([]models.Absence, error) {
+	var absences []models.Absence
+
+	err := r.db.Find(&absences, "class_absence_session_id = ?", id).Error
+
+	return absences, err
+}

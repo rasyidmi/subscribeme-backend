@@ -1,4 +1,4 @@
-# fly.toml app configuration file generated for subscribeme-backend on 2023-05-30T03:14:46+07:00
+# fly.toml app configuration file generated for subscribeme-backend on 2023-06-01T00:31:06+07:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
@@ -11,18 +11,15 @@ primary_region = "sin"
   buildpacks = ["gcr.io/paketo-buildpacks/go"]
 
 [env]
+  AUTH_SECRET = "SUPERSECRETKODEBYSUBSCRIBEME"
+  DB_HOST = "subscribe-me.internal"
+  DB_NAME = "subscribeme"
+  DB_PASSWORD = "4LCaBgTqKGN2yyH"
+  DB_PORT = "5433"
+  DB_USER = "postgres"
   PORT = "8080"
   SIAKNG_PASSWORD = "airiex4L"
   SIAKNG_USERNAME = "ppl-kayu"
-  DB_HOST = "subscribe-me.internal"
-  DB_PORT = "5433"
-  DB_NAME = "subscribeme"
-  DB_USER = "postgres"
-  DB_PASSWORD = "4LCaBgTqKGN2yyH"
-  AUTH_SECRET = "SUPERSECRETKODEBYSUBSCRIBEME"
-
-
-
 
 [http_service]
   internal_port = 8080

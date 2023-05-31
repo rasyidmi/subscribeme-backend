@@ -6,6 +6,7 @@ import (
 	"projects-subscribeme-backend/config"
 	"projects-subscribeme-backend/models"
 
+	"github.com/albrow/jobs"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -35,13 +36,15 @@ func connectDatabase() *gorm.DB {
 
 	migrateDatabase(tx)
 
+	initJobs()
+
 	return tx
 
 }
 
 func migrateDatabase(db *gorm.DB) {
 
-	errMigrate := db.AutoMigrate(&models.User{})
+	errMigrate := db.AutoMigrate(&models.User{}, &models.ClassAbsenceSession{}, &models.Absence{})
 
 	if errMigrate != nil {
 		log.Fatal("Gagal Migrate")
@@ -49,4 +52,10 @@ func migrateDatabase(db *gorm.DB) {
 
 	log.Println("Migrate Berhasil!")
 
+}
+
+func initJobs() {
+	jobs.Config.Db.Database = 10
+	jobs.Config.Db.Password = ""
+	jobs.Config.Db.Address = "localhost:6379"
 }
