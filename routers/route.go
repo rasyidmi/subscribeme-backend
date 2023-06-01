@@ -27,10 +27,10 @@ func RouterSetup() *gin.Engine {
 	user.PUT("", middlewares.Auth("Mahasiswa"), initializers.UserController.UpdateFcmTokenUser)
 
 	siakng := api.Group("/siakng")
-	siakng.GET("/class/npm", middlewares.Auth("Mahasiswa"), initializers.AbsensiController.GetClassScheduleByNpmMahasiswa)
-	siakng.GET("/class/:class_code", middlewares.Auth("Mahasiswa"), initializers.AbsensiController.GetClassScheduleDetailByScheduleId)
-	siakng.GET("/class/schedule/:year/:term", middlewares.Auth("Dosen"), initializers.AbsensiController.GetClassScheduleByYearAndTerm)
-	siakng.GET("/class/participants/:class_code", middlewares.Auth("Mahasiswa"), initializers.AbsensiController.GetClassParticipantByClassCode)
+	siakng.GET("/class/npm", middlewares.Auth("Mahasiswa"), initializers.AbsensiController.GetClassDetailByNpmMahasiswa)
+	// siakng.GET("/class/:class_code", middlewares.Auth("Mahasiswa"), initializers.AbsensiController.GetClassScheduleDetailByScheduleId)
+	// siakng.GET("/class/schedule/:year/:term", middlewares.Auth("Dosen"), initializers.AbsensiController.GetClassScheduleByYearAndTerm)
+	// siakng.GET("/class/participants/:class_code", middlewares.Auth("Mahasiswa"), initializers.AbsensiController.GetClassParticipantByClassCode)
 
 	absence := api.Group("/absence")
 	absence.POST("/session", middlewares.Auth("Dosen"), initializers.AbsensiController.CreateAbsenceSession)

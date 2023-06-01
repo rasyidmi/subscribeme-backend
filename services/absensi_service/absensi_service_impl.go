@@ -186,7 +186,7 @@ func (s *absensiService) GetAbsenceSessionByClassCode(classCode string) (*[]resp
 	return response.NewClassAbsenceSessionResponses(absenceSession), nil
 }
 
-func (s *absensiService) GetClassScheduleByNpmMahasiswa(npm string) (*[]response.ClassScheduleResponse, error) {
+func (s *absensiService) GetClassDetailByNpmMahasiswa(npm string) (*[]response.ClassDetailResponse, error) {
 	var data = map[string]interface{}{}
 
 	data["npm"] = npm
@@ -212,29 +212,29 @@ func (s *absensiService) GetClassScheduleByNpmMahasiswa(npm string) (*[]response
 		return nil, errors.New("404")
 	}
 
-	return response.NewClassScheduleResponses(*models), nil
+	return response.NewClassDetailResponses(*models), nil
 }
 
-func (s *absensiService) GetClassScheduleDetailByScheduleId(scheduleId string) (*response.ClassScheduleResponse, error) {
-	var data = map[string]interface{}{}
+// func (s *absensiService) GetClassScheduleDetailByScheduleId(scheduleId string) (*response.ClassScheduleResponse, error) {
+// 	var data = map[string]interface{}{}
 
-	data["schedule_id"] = scheduleId
+// 	data["schedule_id"] = scheduleId
 
-	models, err := helper.GetSiakngData[models.ClassSchedule](constant.GetClassScheduleByScheduleId, data)
+// 	models, err := helper.GetSiakngData[models.ClassSchedule](constant.GetClassScheduleByScheduleId, data)
 
-	if err != nil {
-		log.Println(string("\033[31m"), err.Error())
-		return nil, err
-	}
+// 	if err != nil {
+// 		log.Println(string("\033[31m"), err.Error())
+// 		return nil, err
+// 	}
 
-	if models.ScheduleUrl == "" {
-		log.Println(string("\033[31m"), err.Error())
-		return nil, errors.New("404")
-	}
+// 	if models.ScheduleUrl == "" {
+// 		log.Println(string("\033[31m"), err.Error())
+// 		return nil, errors.New("404")
+// 	}
 
-	return response.NewClassScheduleResponse(*models), nil
+// 	return response.NewClassScheduleResponse(*models), nil
 
-}
+// }
 
 func (s *absensiService) GetClassParticipantByClassCode(classCode string) (*[]response.ClassDetailResponse, error) {
 	var data = map[string]interface{}{}
@@ -253,27 +253,27 @@ func (s *absensiService) GetClassParticipantByClassCode(classCode string) (*[]re
 		return nil, errors.New("404")
 	}
 
-	return response.NewClassDetailResponses(*models), nil
+	return response.NewClassParticipantResponses(*models), nil
 }
 
-func (s *absensiService) GetClassScheduleByYearAndTerm(year, term string) (*[]response.ClassScheduleResponse, error) {
-	var data = map[string]interface{}{}
+// func (s *absensiService) GetClassScheduleByYearAndTerm(year, term string) (*[]response.ClassScheduleResponse, error) {
+// 	var data = map[string]interface{}{}
 
-	data["year"] = year
-	data["term"] = term
+// 	data["year"] = year
+// 	data["term"] = term
 
-	models, err := helper.GetSiakngData[[]models.ClassSchedule](constant.GetClassScheduleByYearAndTerm, data)
+// 	models, err := helper.GetSiakngData[[]models.ClassSchedule](constant.GetClassScheduleByYearAndTerm, data)
 
-	if err != nil {
-		log.Println(string("\033[31m"), err.Error())
-		return nil, err
-	}
+// 	if err != nil {
+// 		log.Println(string("\033[31m"), err.Error())
+// 		return nil, err
+// 	}
 
-	if len(*models) == 0 {
-		log.Println(string("\033[31m"), err.Error())
-		return nil, errors.New("404")
-	}
+// 	if len(*models) == 0 {
+// 		log.Println(string("\033[31m"), err.Error())
+// 		return nil, errors.New("404")
+// 	}
 
-	return response.NewClassScheduleResponses(*models), nil
+// 	return response.NewClassScheduleResponses(*models), nil
 
-}
+// }

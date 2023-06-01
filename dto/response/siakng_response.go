@@ -1,6 +1,7 @@
 package response
 
 import (
+	"log"
 	"projects-subscribeme-backend/models"
 	"strings"
 
@@ -8,20 +9,20 @@ import (
 )
 
 type ClassScheduleResponse struct {
-	ScheduleId  string              `json:"schedule_id"`
-	Day         string              `json:"day"`
-	StartTime   string              `json:"start_time"`
-	EndTime     string              `json:"end_time"`
-	ClassDetail ClassDetailResponse `json:"class_detail"`
-	Room        RoomResponse        `json:"room"`
+	ScheduleId string       `json:"schedule_id,omitempty"`
+	Day        string       `json:"day,omitempty"`
+	StartTime  string       `json:"start_time,omitempty"`
+	EndTime    string       `json:"end_time,omitempty"`
+	Room       RoomResponse `json:"room,omitempty"`
 }
 
 type ClassDetailResponse struct {
-	ClassName   string                `json:"class_name"`
-	ClassCode   string                `json:"class_code"`
-	Course      CourseResponse        `json:"course,omitempty"`
-	Lecturers   []LecturersResponse   `json:"lectures"`
-	ListStudent []ListStudentResponse `json:"list_student,omitempty"`
+	ClassName     string                  `json:"class_name"`
+	ClassCode     string                  `json:"class_code"`
+	Course        CourseResponse          `json:"course,omitempty"`
+	ClassSchedule []ClassScheduleResponse `json:"class_schedule_response,omitempty"`
+	Lecturers     []LecturersResponse     `json:"lectures"`
+	ListStudent   []ListStudentResponse   `json:"list_student,omitempty"`
 }
 
 type CourseResponse struct {
@@ -77,7 +78,44 @@ func NewClassScheduleResponses(models []models.ClassSchedule) *[]ClassScheduleRe
 	return &response
 }
 
-func NewClassDetailResponses(models []models.ClassDetail) *[]ClassDetailResponse {
+func NewClassDetailResponse(models models.ClassDetail) *ClassDetailResponse {
+	var response ClassDetailResponse
+	copier.Copy(&response, models)
+
+	return &response
+}
+
+func NewClassDetailResponses(models []models.ClassSchedule) *[]ClassDetailResponse {
+	var responses []ClassDetailResponse
+
+	classMap := make(map[string]int)
+
+	for _, v := range models {
+		iterator := 0
+		var response ClassDetailResponse
+		log.Println(v.ClassDetail.ClassName)
+
+		val, ok := classMap[v.ClassDetail.ClassCode]
+		if ok {
+			log.Println("MASUK OK")
+			classSchedule := NewClassScheduleResponse(v)
+			responses[val].ClassSchedule = append(responses[val].ClassSchedule, *classSchedule)
+		} else {
+			log.Println("MASUK ELSE")
+			classMap[v.ClassDetail.ClassCode] = iterator
+			classSchedule := NewClassScheduleResponse(v)
+			response = *NewClassDetailResponse(v.ClassDetail)
+			response.ClassSchedule = append(response.ClassSchedule, *classSchedule)
+			responses = append(responses, response)
+			iterator++
+		}
+		log.Println(responses)
+	}
+
+	return &responses
+}
+
+func NewClassParticipantResponses(models []models.ClassDetail) *[]ClassDetailResponse {
 	var response []ClassDetailResponse
 
 	copier.Copy(&response, models)

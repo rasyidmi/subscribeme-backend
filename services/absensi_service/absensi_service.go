@@ -17,8 +17,9 @@ type AbsensiService interface {
 	GetAbsenceSessionByClassCode(classCode string) (*[]response.ClassAbsenceSessionResponse, error)
 	GetAbsenceByAbsenceSessionId(absenceSessionId string) (*[]response.AbsenceResponse, error)
 
-	GetClassScheduleByNpmMahasiswa(npm string) (*[]response.ClassScheduleResponse, error)
-	GetClassScheduleDetailByScheduleId(scheduleId string) (*response.ClassScheduleResponse, error)
-	GetClassScheduleByYearAndTerm(year, term string) (*[]response.ClassScheduleResponse, error)
+	GetClassDetailByNpmMahasiswa(npm string) (*[]response.ClassDetailResponse, error)
 	GetClassParticipantByClassCode(classCode string) (*[]response.ClassDetailResponse, error)
+	// GetClassScheduleDetailByScheduleId(scheduleId string) (*response.ClassScheduleResponse, error)
+	// GetClassScheduleByYearAndTerm(year, term string) (*[]response.ClassScheduleResponse, error)
+
 }
