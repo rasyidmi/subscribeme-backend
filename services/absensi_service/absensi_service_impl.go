@@ -2,6 +2,7 @@ package absensi_service
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"projects-subscribeme-backend/constant"
 	"projects-subscribeme-backend/dto/payload"
@@ -11,6 +12,7 @@ import (
 	absensi_repository "projects-subscribeme-backend/repositories/absence_repository"
 	"time"
 
+	"github.com/TigorLazuardi/tanggal"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
@@ -25,8 +27,19 @@ func NewAbsensiService(repository absensi_repository.AbsensiRepository) AbsensiS
 
 func (s *absensiService) CreateAbsenceSession(payload payload.ClassAbsenceSessionPayload, claims *helper.JWTClaim) (*response.ClassAbsenceSessionResponse, error) {
 	_, err := s.CheckAbsenceIsOpen(payload.ClassCode)
+
+	classSessionCheck := false
 	if err != nil {
-		log.Println(string("\033[31m"), err.Error())
+		if err.Error() == "404" {
+			classSessionCheck = true
+		} else {
+			log.Println(string("\033[31m"), err.Error())
+			return nil, err
+		}
+	}
+
+	if !classSessionCheck {
+		log.Println(string("\033[31m"), errors.New("403"))
 		return nil, err
 	}
 
@@ -53,13 +66,13 @@ func (s *absensiService) CreateAbsenceSession(payload payload.ClassAbsenceSessio
 		return nil, err
 	}
 
-	go s.createAbsence(absenceSession)
+	go s.createAbsence(absenceSession, payload.StartTime)
 
-	return response.NewClassAbsenceSessionResponse(absenceSession), nil
+	return response.NewClassAbsenceSessionResponse(absenceSession, false), nil
 
 }
 
-func (s *absensiService) createAbsence(payload models.ClassAbsenceSession) (bool, error) {
+func (s *absensiService) createAbsence(payload models.ClassAbsenceSession, absenceOpenTime time.Time) (bool, error) {
 	model, err := s.GetClassParticipantByClassCode(payload.ClassCode)
 	if err != nil {
 		log.Println(string("\033[31m"), err.Error())
@@ -68,12 +81,18 @@ func (s *absensiService) createAbsence(payload models.ClassAbsenceSession) (bool
 
 	classParticipant := *model
 
+	tgl, err := tanggal.Papar(absenceOpenTime, "Jakarta", tanggal.WIB)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	absences := []models.Absence{}
-	for _, val := range classParticipant[0].ListStudent {
+	for _, val := range classParticipant {
 		absence := &models.Absence{
 			ClassAbsenceSessionID: payload.ID.String(),
 			StudentName:           val.Student[0].Name,
 			StudentNpm:            val.Student[0].Npm,
+			ClassDate:             fmt.Sprintf("%s, %d %s %d", tgl.NamaHari, tgl.Hari, tgl.NamaBulan, tgl.Tahun),
 			Present:               false,
 		}
 
@@ -142,7 +161,7 @@ func (s *absensiService) CheckAbsenceIsOpen(classCode string) (*response.ClassAb
 		return &response.ClassAbsenceSessionResponse{}, errors.New("404")
 	}
 
-	return response.NewClassAbsenceSessionResponse(absenceClass), nil
+	return response.NewClassAbsenceSessionResponse(absenceClass, false), nil
 
 }
 
@@ -163,15 +182,15 @@ func (s *absensiService) GetAbsenceByClassCodeAndNpm(classCode string, claims *h
 	return response.NewAbsenceResponses(absence), nil
 }
 
-func (s *absensiService) GetAbsenceByAbsenceSessionId(absenceSessionId string) (*[]response.AbsenceResponse, error) {
+func (s *absensiService) GetAbsenceSessionDetailByAbsenceSessionId(absenceSessionId string) (*[]response.ClassAbsenceSessionResponse, error) {
 
-	absences, err := s.repository.GetAbsenceByAbsenceSessionId(absenceSessionId)
+	absenceSessions, err := s.repository.GetAbsenceSessionByAbsenceSessionId(absenceSessionId)
 	if err != nil {
 		log.Println(string("\033[31m"), err.Error())
 		return nil, err
 	}
 
-	return response.NewAbsenceResponses(absences), nil
+	return response.NewClassAbsenceSessionResponses(absenceSessions, true), nil
 
 }
 
@@ -183,7 +202,7 @@ func (s *absensiService) GetAbsenceSessionByClassCode(classCode string) (*[]resp
 		return nil, err
 	}
 
-	return response.NewClassAbsenceSessionResponses(absenceSession), nil
+	return response.NewClassAbsenceSessionResponses(absenceSession, false), nil
 }
 
 func (s *absensiService) GetClassDetailByNpmMahasiswa(npm string) (*[]response.ClassDetailResponse, error) {
@@ -201,7 +220,7 @@ func (s *absensiService) GetClassDetailByNpmMahasiswa(npm string) (*[]response.C
 
 	data["term"] = "2"
 
-	models, err := helper.GetSiakngData[[]models.ClassSchedule](constant.GetClassScheduleByNpmMahasiswa, data)
+	models, err := helper.GetSiakngData[[]models.ClassSchedule](constant.GetClassDetailByNpmMahasiswa, data)
 
 	if err != nil {
 		log.Println(string("\033[31m"), err.Error())
@@ -215,28 +234,29 @@ func (s *absensiService) GetClassDetailByNpmMahasiswa(npm string) (*[]response.C
 	return response.NewClassDetailResponses(*models), nil
 }
 
-// func (s *absensiService) GetClassScheduleDetailByScheduleId(scheduleId string) (*response.ClassScheduleResponse, error) {
-// 	var data = map[string]interface{}{}
+func (s *absensiService) GetClassDetailByNimDosen(nim string) (*[]response.ClassDetailResponse, error) {
+	var data = map[string]interface{}{}
 
-// 	data["schedule_id"] = scheduleId
+	data["nim"] = nim
+	data["tahun"] = "2019"
+	data["term"] = "2"
 
-// 	models, err := helper.GetSiakngData[models.ClassSchedule](constant.GetClassScheduleByScheduleId, data)
+	models, err := helper.GetSiakngData[[]models.ClassSchedule](constant.GetClassDetailByNimDosen, data)
 
-// 	if err != nil {
-// 		log.Println(string("\033[31m"), err.Error())
-// 		return nil, err
-// 	}
+	if err != nil {
+		log.Println(string("\033[31m"), err.Error())
+		return nil, err
+	}
 
-// 	if models.ScheduleUrl == "" {
-// 		log.Println(string("\033[31m"), err.Error())
-// 		return nil, errors.New("404")
-// 	}
+	if len(*models) == 0 {
+		return nil, errors.New("404")
+	}
 
-// 	return response.NewClassScheduleResponse(*models), nil
+	return response.NewClassDetailResponses(*models), nil
 
-// }
+}
 
-func (s *absensiService) GetClassParticipantByClassCode(classCode string) (*[]response.ClassDetailResponse, error) {
+func (s *absensiService) GetClassParticipantByClassCode(classCode string) (*[]response.ListStudentResponse, error) {
 	var data = map[string]interface{}{}
 
 	data["kd_kls"] = classCode
@@ -255,25 +275,3 @@ func (s *absensiService) GetClassParticipantByClassCode(classCode string) (*[]re
 
 	return response.NewClassParticipantResponses(*models), nil
 }
-
-// func (s *absensiService) GetClassScheduleByYearAndTerm(year, term string) (*[]response.ClassScheduleResponse, error) {
-// 	var data = map[string]interface{}{}
-
-// 	data["year"] = year
-// 	data["term"] = term
-
-// 	models, err := helper.GetSiakngData[[]models.ClassSchedule](constant.GetClassScheduleByYearAndTerm, data)
-
-// 	if err != nil {
-// 		log.Println(string("\033[31m"), err.Error())
-// 		return nil, err
-// 	}
-
-// 	if len(*models) == 0 {
-// 		log.Println(string("\033[31m"), err.Error())
-// 		return nil, errors.New("404")
-// 	}
-
-// 	return response.NewClassScheduleResponses(*models), nil
-
-// }

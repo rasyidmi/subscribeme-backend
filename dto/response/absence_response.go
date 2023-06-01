@@ -8,15 +8,19 @@ import (
 )
 
 type ClassAbsenceSessionResponse struct {
-	ID          string    `json:"id"`
-	TeacherName string    `json:"teacher_name"`
-	ClassCode   string    `json:"class_code"`
-	StartTime   time.Time `json:"start_time"`
-	EndTime     time.Time `json:"end_time"`
-	IsGeofence  bool      `json:"is_geofence"`
-	GeoRadius   float64   `json:"geo_radius"`
-	Latitude    float64   `json:"latitude,omitempty"`
-	Longitude   float64   `json:"longitude,omitempty"`
+	ID                       string            `json:"id"`
+	TeacherName              string            `json:"teacher_name"`
+	ClassCode                string            `json:"class_code"`
+	StartTime                time.Time         `json:"start_time"`
+	EndTime                  time.Time         `json:"end_time"`
+	IsGeofence               bool              `json:"is_geofence"`
+	GeoRadius                float64           `json:"geo_radius"`
+	Latitude                 float64           `json:"latitude,omitempty"`
+	Longitude                float64           `json:"longitude,omitempty"`
+	TotalStudentClass        float64           `json:"total_student_class"`
+	TotalPresentStudentClass float64           `json:"total_present_student_class"`
+	TotalAbsenceStudentClass float64           `json:"total_absence_student"`
+	AbsenceResponse          []AbsenceResponse `json:"absence_response,omitempty"`
 }
 
 type AbsenceResponse struct {
@@ -27,10 +31,11 @@ type AbsenceResponse struct {
 	Longitude             float64   `json:"longitude"`
 	DeviceCode            string    `json:"device_code"`
 	PresentTime           time.Time `json:"present_time"`
+	ClassAbsenceOpenTime  time.Time `json:"class_absence_open_time"`
 	Present               bool      `json:"present"`
 }
 
-func NewClassAbsenceSessionResponse(model models.ClassAbsenceSession) *ClassAbsenceSessionResponse {
+func NewClassAbsenceSessionResponse(model models.ClassAbsenceSession, isPreload bool) *ClassAbsenceSessionResponse {
 	response := &ClassAbsenceSessionResponse{
 		ID:          model.ID.String(),
 		TeacherName: model.TeacherName,
@@ -46,14 +51,37 @@ func NewClassAbsenceSessionResponse(model models.ClassAbsenceSession) *ClassAbse
 		response.Longitude = model.Longitude
 	}
 
+	if isPreload {
+		response.AbsenceResponse = *NewAbsenceResponses(model.Absence)
+		total, present, absence := countStudentPresent(model.Absence)
+		response.TotalStudentClass = total
+		response.TotalPresentStudentClass = present
+		response.TotalAbsenceStudentClass = absence
+
+	}
+
 	return response
 }
 
-func NewClassAbsenceSessionResponses(model []models.ClassAbsenceSession) *[]ClassAbsenceSessionResponse {
+func countStudentPresent(model []models.Absence) (total float64, present float64, absence float64) {
+	total = float64(len(model))
+
+	for _, v := range model {
+		if v.Present {
+			present++
+		}
+	}
+
+	absence = float64(total - present)
+
+	return total, present, absence
+}
+
+func NewClassAbsenceSessionResponses(model []models.ClassAbsenceSession, isPreload bool) *[]ClassAbsenceSessionResponse {
 	var responses []ClassAbsenceSessionResponse
 
 	for _, v := range model {
-		response := NewClassAbsenceSessionResponse(v)
+		response := NewClassAbsenceSessionResponse(v, isPreload)
 		responses = append(responses, *response)
 
 	}

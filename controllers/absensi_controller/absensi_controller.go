@@ -9,11 +9,9 @@ type AbsensiController interface {
 	UpdateAbsence(ctx *gin.Context)
 	CheckAbsenceIsOpen(ctx *gin.Context)
 	GetAbsenceByClassCodeAndNpm(ctx *gin.Context)
-	GetAbsenceByAbsenceSessionId(ctx *gin.Context)
+	GetClassDetailByNimDosen(ctx *gin.Context)
+	GetAbsenceSessionDetailByAbsenceSessionId(ctx *gin.Context)
 	GetAbsenceSessionByClassCode(ctx *gin.Context)
-
 	GetClassDetailByNpmMahasiswa(ctx *gin.Context)
-	// GetClassScheduleDetailByScheduleId(ctx *gin.Context)
-	// GetClassScheduleByYearAndTerm(ctx *gin.Context)
-	// GetClassParticipantByClassCode(ctx *gin.Context)
+	GetClassParticipantByClassCode(ctx *gin.Context)
 }

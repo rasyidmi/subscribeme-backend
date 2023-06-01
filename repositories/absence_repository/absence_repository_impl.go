@@ -74,10 +74,10 @@ func (r *absensiRepository) GetAbsenceByClassCodeAndNpm(classCode string, npm st
 	return absences, err
 }
 
-func (r *absensiRepository) GetAbsenceByAbsenceSessionId(id string) ([]models.Absence, error) {
-	var absences []models.Absence
+func (r *absensiRepository) GetAbsenceSessionByAbsenceSessionId(id string) ([]models.ClassAbsenceSession, error) {
+	var absenceSessions []models.ClassAbsenceSession
 
-	err := r.db.Find(&absences, "class_absence_session_id = ?", id).Error
+	err := r.db.Preload("Absence").First(&absenceSessions, "id = ?", id).Error
 
-	return absences, err
+	return absenceSessions, err
 }

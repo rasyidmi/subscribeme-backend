@@ -3,10 +3,10 @@ package constant
 type SiakNGEnum string
 
 const (
-	GetClassScheduleByYearAndTerm  SiakNGEnum = "https://api-kp.cs.ui.ac.id/siakngcs/jadwal-list/%s/%s/"
-	GetClassScheduleByScheduleId   SiakNGEnum = "https://api-kp.cs.ui.ac.id/siakngcs/jadwal/%s/"
-	GetClassScheduleByNpmMahasiswa SiakNGEnum = "https://api-kp.cs.ui.ac.id/siakngcs/mahasiswa/%s/jadwal-kelas/%s/%s/"
+	GetClassDetailByNpmMahasiswa SiakNGEnum = "https://api-kp.cs.ui.ac.id/siakngcs/mahasiswa/%s/jadwal-kelas/%s/%s/"
 	GetClassParticipantByClassCode SiakNGEnum = "https://api-kp.cs.ui.ac.id/siakngcs/kelas/peserta/%s/"
+
+	GetClassDetailByNimDosen SiakNGEnum = "https://api-kp.cs.ui.ac.id/siakngcs/dosen/%s/jadwal-kelas/%s/%s/"
 )
 
 func (x SiakNGEnum) String() string {

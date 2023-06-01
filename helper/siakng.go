@@ -18,26 +18,20 @@ func GetSiakngData[T models.ClassSchedule | []models.ClassSchedule | []models.Cl
 
 	var req *http.Request
 
-	if api == constant.GetClassScheduleByNpmMahasiswa {
-		reqs, err := http.NewRequest("GET", fmt.Sprintf(constant.GetClassScheduleByNpmMahasiswa.String(), data["npm"], data["tahun"], data["term"]), nil)
-		if err != nil {
-			return nil, err
-		}
-		req = reqs
-	} else if api == constant.GetClassScheduleByYearAndTerm {
-		reqs, err := http.NewRequest("GET", fmt.Sprintf(constant.GetClassScheduleByYearAndTerm.String(), data["year"], data["term"]), nil)
-		if err != nil {
-			return nil, err
-		}
-		req = reqs
-	} else if api == constant.GetClassScheduleByScheduleId {
-		reqs, err := http.NewRequest("GET", fmt.Sprintf(constant.GetClassScheduleByScheduleId.String(), data["schedule_id"]), nil)
+	if api == constant.GetClassDetailByNpmMahasiswa {
+		reqs, err := http.NewRequest("GET", fmt.Sprintf(constant.GetClassDetailByNpmMahasiswa.String(), data["npm"], data["tahun"], data["term"]), nil)
 		if err != nil {
 			return nil, err
 		}
 		req = reqs
 	} else if api == constant.GetClassParticipantByClassCode {
 		reqs, err := http.NewRequest("GET", fmt.Sprintf(constant.GetClassParticipantByClassCode.String(), data["kd_kls"]), nil)
+		if err != nil {
+			return nil, err
+		}
+		req = reqs
+	} else if api == constant.GetClassDetailByNimDosen {
+		reqs, err := http.NewRequest("GET", fmt.Sprintf(constant.GetClassDetailByNimDosen.String(), data["nim"], data["tahun"], data["term"]), nil)
 		if err != nil {
 			return nil, err
 		}

@@ -14,6 +14,6 @@ type AbsensiRepository interface {
 	GetAbsenceSessionByClassCode(classCode string) ([]models.ClassAbsenceSession, error)
 	GetAbsenceSessionById(id string) (models.ClassAbsenceSession, error)
 
-	GetAbsenceByAbsenceSessionId(id string) ([]models.Absence, error)
+	GetAbsenceSessionByAbsenceSessionId(id string) ([]models.ClassAbsenceSession, error)
 	GetAbsenceByClassCodeAndNpm(classCode string, npm string) ([]models.Absence, error)
 }

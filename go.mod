@@ -5,6 +5,7 @@ go 1.18
 require gorm.io/driver/postgres v1.3.4
 
 require (
+	github.com/TigorLazuardi/tanggal v1.0.0 // indirect
 	github.com/albrow/jobs v0.4.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dchest/uniuri v1.2.0 // indirect

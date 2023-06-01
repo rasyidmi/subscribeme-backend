@@ -1,7 +1,6 @@
 package response
 
 import (
-	"log"
 	"projects-subscribeme-backend/models"
 	"strings"
 
@@ -20,7 +19,7 @@ type ClassDetailResponse struct {
 	ClassName     string                  `json:"class_name"`
 	ClassCode     string                  `json:"class_code"`
 	Course        CourseResponse          `json:"course,omitempty"`
-	ClassSchedule []ClassScheduleResponse `json:"class_schedule_response,omitempty"`
+	ClassSchedule []ClassScheduleResponse `json:"class_schedule,omitempty"`
 	Lecturers     []LecturersResponse     `json:"lectures"`
 	ListStudent   []ListStudentResponse   `json:"list_student,omitempty"`
 }
@@ -89,19 +88,16 @@ func NewClassDetailResponses(models []models.ClassSchedule) *[]ClassDetailRespon
 	var responses []ClassDetailResponse
 
 	classMap := make(map[string]int)
-
+	iterator := 0
 	for _, v := range models {
-		iterator := 0
+
 		var response ClassDetailResponse
-		log.Println(v.ClassDetail.ClassName)
 
 		val, ok := classMap[v.ClassDetail.ClassCode]
 		if ok {
-			log.Println("MASUK OK")
 			classSchedule := NewClassScheduleResponse(v)
 			responses[val].ClassSchedule = append(responses[val].ClassSchedule, *classSchedule)
 		} else {
-			log.Println("MASUK ELSE")
 			classMap[v.ClassDetail.ClassCode] = iterator
 			classSchedule := NewClassScheduleResponse(v)
 			response = *NewClassDetailResponse(v.ClassDetail)
@@ -109,16 +105,15 @@ func NewClassDetailResponses(models []models.ClassSchedule) *[]ClassDetailRespon
 			responses = append(responses, response)
 			iterator++
 		}
-		log.Println(responses)
 	}
 
 	return &responses
 }
 
-func NewClassParticipantResponses(models []models.ClassDetail) *[]ClassDetailResponse {
+func NewClassParticipantResponses(models []models.ClassDetail) *[]ListStudentResponse {
 	var response []ClassDetailResponse
 
 	copier.Copy(&response, models)
 
-	return &response
+	return &response[0].ListStudent
 }
