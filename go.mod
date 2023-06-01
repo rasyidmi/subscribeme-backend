@@ -13,6 +13,7 @@ require (
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
 	github.com/garyburd/redigo v1.6.4 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
+	github.com/jftuga/geodist v1.0.0 // indirect
 	github.com/jinzhu/copier v0.3.5 // indirect
 	github.com/lib/pq v1.10.9 // indirect
 	github.com/magiconair/properties v1.8.5 // indirect

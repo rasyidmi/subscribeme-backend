@@ -67,8 +67,12 @@ func (c *absensiController) UpdateAbsence(ctx *gin.Context) {
 			response.Error(ctx, "failed", http.StatusBadRequest, errors.New("payload error"))
 			ctx.Abort()
 			return
-		} else if err.Error() == "404" {
-			response.Error(ctx, "failed", http.StatusForbidden, errors.New("No absence is open"))
+		} else if err.Error() == "absence slot has ended" {
+			response.Error(ctx, "failed", http.StatusForbidden, err)
+			ctx.Abort()
+			return
+		} else if err.Error() == "Your distance is too far from classroom" {
+			response.Error(ctx, "failed", http.StatusForbidden, err)
 			ctx.Abort()
 			return
 		}

@@ -14,6 +14,7 @@ import (
 
 	"github.com/TigorLazuardi/tanggal"
 	"github.com/google/uuid"
+	"github.com/jftuga/geodist"
 	"gorm.io/gorm"
 )
 
@@ -117,7 +118,7 @@ func (s *absensiService) UpdateAbsence(payload payload.AbsencePayload, claims *h
 	}
 
 	if absenceSession.EndTime.Before(time.Now()) {
-		return nil, errors.New("403")
+		return nil, errors.New("absence slot has ended")
 	}
 
 	absence := models.Absence{
@@ -130,10 +131,22 @@ func (s *absensiService) UpdateAbsence(payload payload.AbsencePayload, claims *h
 		if payload.Latitude == 0 || payload.Longitude == 0 {
 			return nil, errors.New("400")
 		}
+		//TODO Check Virsanti
+		classRoomLoc := geodist.Coord{Lat: absenceSession.Latitude, Lon: absenceSession.Longitude}
+		studentLoca := geodist.Coord{Lat:payload.Latitude, Lon: payload.Longitude}
+
+		_, km, err := geodist.VincentyDistance(classRoomLoc, studentLoca)
+		if err != nil {
+			return nil, errors.New("error to compute distance")
+		}
+
+		if km * 1000 > absenceSession.GeoRadius {
+			return nil, errors.New("Your distance is too far from classroom")
+		}
+
 		absence.Latitude = payload.Latitude
 		absence.Longitude = payload.Longitude
 
-		//TODO Check Virsanti
 	}
 
 	update, err := s.repository.UpdateAbsence(absence, claims.Npm, payload.ClassAbsenceSessionId)
