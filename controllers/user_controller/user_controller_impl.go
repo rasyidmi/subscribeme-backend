@@ -86,3 +86,24 @@ func (c *userContrroler) Login(ctx *gin.Context) {
 	response.Success(ctx, "success", http.StatusOK, token)
 
 }
+
+func (c *userContrroler) UpdateFcmTokenUser(ctx *gin.Context) {
+	var payload payload.FcmPayload
+
+	if err := ctx.Bind(&payload); err != nil {
+		response.Error(ctx, "failed", http.StatusBadRequest, err)
+		ctx.Abort()
+		return
+	}
+
+	claims := helper.GetTokenClaims(ctx)
+
+	user, err := c.service.UpdateFcmTokenUser(claims, payload)
+	if err != nil {
+		response.Error(ctx, "failed", http.StatusNoContent, err)
+		ctx.Abort()
+		return
+	}
+
+	response.Success(ctx, "success", http.StatusOK, user)
+}

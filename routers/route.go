@@ -24,6 +24,7 @@ func RouterSetup() *gin.Engine {
 
 	user := api.Group("/user")
 	user.POST("", middlewares.Auth("Mahasiswa"), initializers.UserController.CreateUser)
+	user.PUT("", middlewares.Auth("Mahasiswa"), initializers.UserController.UpdateFcmTokenUser)
 
 	siakng := api.Group("/siakng")
 	siakng.GET("/class/npm", middlewares.Auth("Mahasiswa"), initializers.AbsensiController.GetClassScheduleByNpmMahasiswa)

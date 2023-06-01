@@ -89,11 +89,14 @@ func (s *userService) Login(payload payload.SSOPayload) (*response.LoginResponse
 
 	}
 
+	var expirationTime time.Time
+
 	if isExists {
 		role = user.Role.String()
+		expirationTime = time.Now().Add(35064 * time.Hour)
+	} else {
+		expirationTime = time.Now().Add(2 * time.Hour)
 	}
-
-	expirationTime := time.Now().Add(2 * time.Hour)
 
 	token, err := helper.GenerateJWT(*sso, role, expirationTime)
 	if err != nil {
@@ -104,4 +107,15 @@ func (s *userService) Login(payload payload.SSOPayload) (*response.LoginResponse
 
 	return response.NewLoginResponse(token, &isExists), nil
 
+}
+
+func (s *userService) UpdateFcmTokenUser(claims *helper.JWTClaim, payload payload.FcmPayload) (*response.UserResponse, error) {
+	user, err := s.repository.UpdateFcmTokenUser(claims.Username, payload.FcmToken)
+	if err != nil {
+
+		log.Println(string("\033[31m"), err.Error())
+		return nil, errors.New("404")
+	}
+
+	return response.NewUserResponse(user), nil
 }

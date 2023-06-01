@@ -28,4 +28,11 @@ func (r *userRepository) GetUserByUsername(username string) (models.User, error)
 	return user, err
 }
 
+func (r *userRepository) UpdateFcmTokenUser(username string, fcmToken string) (models.User, error) {
+	err := r.db.Model(&models.User{}).Where("username = ?", username).Update("name", fcmToken).Error
+	if err != nil {
+		return models.User{}, err
+	}
 
+	return r.GetUserByUsername(username)
+}
