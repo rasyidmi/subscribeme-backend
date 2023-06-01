@@ -9,6 +9,7 @@ import (
 	"projects-subscribeme-backend/helper"
 	"projects-subscribeme-backend/models"
 	"projects-subscribeme-backend/repositories/user_repository"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -21,7 +22,7 @@ func NewUserService(repository user_repository.UserRepository) UserService {
 	return &userService{repository: repository}
 }
 
-func (s *userService) CreateUser(claims *helper.JWTClaim, payload payload.FcmPayload) (*response.UserResponse, error) {
+func (s *userService) CreateUser(claims *helper.JWTClaim, payload payload.FcmPayload) (*response.LoginResponse, error) {
 	user := models.User{
 		Username: claims.Username,
 		Role:     constant.UserRoleMahasiswa,
@@ -34,7 +35,16 @@ func (s *userService) CreateUser(claims *helper.JWTClaim, payload payload.FcmPay
 		return nil, err
 	}
 
-	return response.NewUserResponse(user), nil
+	expirationTime := time.Now().Add(35064 * time.Hour)
+
+	token, err := helper.RefreshJWT(claims, user.Role.String(), expirationTime)
+	if err != nil {
+
+		log.Println(string("\033[31m"), err.Error())
+		return nil, errors.New("404")
+	}
+
+	return response.NewLoginResponse(token, nil), nil
 
 }
 
@@ -46,7 +56,9 @@ func (s *userService) LoginFromSSOUI(ticket string) (*response.LoginResponse, er
 		return nil, err
 	}
 
-	token, err := helper.GenerateJWT(*user, "Mahasiswa")
+	expirationTime := time.Now().Add(2 * time.Hour)
+
+	token, err := helper.GenerateJWT(*user, "Mahasiswa", expirationTime)
 	if err != nil {
 
 		log.Println(string("\033[31m"), err.Error())
@@ -70,16 +82,20 @@ func (s *userService) Login(payload payload.SSOPayload) (*response.LoginResponse
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			isExists = false
+		} else {
+			log.Println(string("\033[31m"), err.Error())
+			return nil, errors.New("500")
 		}
-		log.Println(string("\033[31m"), err.Error())
-		return nil, err
+
 	}
 
 	if isExists {
 		role = user.Role.String()
 	}
 
-	token, err := helper.GenerateJWT(*sso, role)
+	expirationTime := time.Now().Add(2 * time.Hour)
+
+	token, err := helper.GenerateJWT(*sso, role, expirationTime)
 	if err != nil {
 
 		log.Println(string("\033[31m"), err.Error())

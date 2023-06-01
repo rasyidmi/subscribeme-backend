@@ -9,5 +9,5 @@ import (
 type UserService interface {
 	LoginFromSSOUI(ticket string) (*response.LoginResponse, error)
 	Login(payload payload.SSOPayload) (*response.LoginResponse, error)
-	CreateUser(claims *helper.JWTClaim, payload payload.FcmPayload) (*response.UserResponse, error)
+	CreateUser(claims *helper.JWTClaim, payload payload.FcmPayload) (*response.LoginResponse, error)
 }

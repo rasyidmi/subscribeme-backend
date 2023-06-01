@@ -34,13 +34,18 @@ func (r *absensiRepository) UpdateAbsence(absence models.Absence, npm string, id
 		return models.Absence{}, err
 	}
 
+	err = r.db.First(&absence, "student_npm = ? AND class_absence_session_id = ?", npm, id).Error
+	if err != nil {
+		return models.Absence{}, err
+	}
+
 	return absence, err
 
 }
 
 func (r *absensiRepository) GetIsOpenAbsenceSessionByClassCodeAndEndTime(classCode string) (models.ClassAbsenceSession, error) {
 	var classAbsence models.ClassAbsenceSession
-	err := r.db.Raw("select * from class_absence_session cas where cas.end_time >= now() and cas.class_code = ?", classCode).Scan(&classAbsence).Error
+	err := r.db.Raw("select * from class_absence_sessions cas where cas.end_time >= now() and cas.class_code = ?", classCode).Scan(&classAbsence).Error
 	return classAbsence, err
 }
 
@@ -64,7 +69,7 @@ func (r *absensiRepository) GetAbsenceSessionByClassCode(classCode string) ([]mo
 func (r *absensiRepository) GetAbsenceByClassCodeAndNpm(classCode string, npm string) ([]models.Absence, error) {
 	var absences []models.Absence
 
-	err := r.db.Raw("select a.* from absence a JOIN class_absence_session cas ON a.class_absence_session = cas.id AND cas.class_code = ? AND a.student_npm = ?", classCode, npm).Scan(&absences).Error
+	err := r.db.Raw("select a.* from absences a JOIN class_absence_sessions cas ON a.class_absence_session_id = cas.id AND cas.class_code = ? AND a.student_npm = ?", classCode, npm).Scan(&absences).Error
 
 	return absences, err
 }

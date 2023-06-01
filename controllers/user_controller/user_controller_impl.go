@@ -73,6 +73,10 @@ func (c *userContrroler) Login(ctx *gin.Context) {
 			response.Error(ctx, "failed", http.StatusUnauthorized, errors.New("You're not Fasilkom"))
 			ctx.Abort()
 			return
+		} else if err.Error() == "500" {
+			response.Error(ctx, "failed", http.StatusInternalServerError, err)
+			ctx.Abort()
+			return
 		}
 		response.Error(ctx, "failed", http.StatusNoContent, err)
 		ctx.Abort()

@@ -3,6 +3,7 @@ package helper
 import (
 	"errors"
 	"projects-subscribeme-backend/config"
+
 	"projects-subscribeme-backend/models"
 	"time"
 
@@ -19,9 +20,8 @@ type JWTClaim struct {
 	jwt.StandardClaims
 }
 
-func GenerateJWT(ssoResponse models.ServiceResponse, role string) (tokenString string, err error) {
+func GenerateJWT(ssoResponse models.ServiceResponse, role string, expirationTime time.Time) (tokenString string, err error) {
 	configJwt := config.LoadAuthConfig()
-	expirationTime := time.Now().Add(48 * time.Hour)
 	claims := &JWTClaim{
 		Nama:     ssoResponse.AuthenticationSuccess.Attributes.Nama,
 		Username: ssoResponse.AuthenticationSuccess.User,
@@ -33,6 +33,23 @@ func GenerateJWT(ssoResponse models.ServiceResponse, role string) (tokenString s
 		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	tokenString, err = token.SignedString([]byte(configJwt.Secret))
+	return
+}
+
+func RefreshJWT(claims *JWTClaim, role string, expirationTime time.Time) (tokenString string, err error) {
+	configJwt := config.LoadAuthConfig()
+	newClaims := &JWTClaim{
+		Nama:     claims.Nama,
+		Username: claims.Username,
+		Npm:      claims.Npm,
+		Jurusan:  claims.Jurusan,
+		Role:     role,
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: expirationTime.Unix(),
+		},
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, newClaims)
 	tokenString, err = token.SignedString([]byte(configJwt.Secret))
 	return
 }

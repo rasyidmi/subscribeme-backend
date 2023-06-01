@@ -23,7 +23,7 @@ func RouterSetup() *gin.Engine {
 	api.POST("/login", initializers.UserController.Login)
 
 	user := api.Group("/user")
-	user.POST("", initializers.UserController.CreateUser)
+	user.POST("", middlewares.Auth("Mahasiswa"), initializers.UserController.CreateUser)
 
 	siakng := api.Group("/siakng")
 	siakng.GET("/class/npm", middlewares.Auth("Mahasiswa"), initializers.AbsensiController.GetClassScheduleByNpmMahasiswa)
@@ -34,10 +34,10 @@ func RouterSetup() *gin.Engine {
 	absence := api.Group("/absence")
 	absence.POST("/session", middlewares.Auth("Dosen"), initializers.AbsensiController.CreateAbsenceSession)
 	absence.PUT("", middlewares.Auth("Mahasiswa"), initializers.AbsensiController.UpdateAbsence)
-	absence.GET("/check", middlewares.Auth("Mahasiswa"), initializers.AbsensiController.CheckAbsenceIsOpen)
+	absence.GET("/check/:class_code", middlewares.Auth("Mahasiswa"), initializers.AbsensiController.CheckAbsenceIsOpen)
 	absence.GET("/:class_code", middlewares.Auth("Mahasiswa"), initializers.AbsensiController.GetAbsenceByClassCodeAndNpm)
 	absence.GET("/session-id/:absence_session_id", middlewares.Auth("Dosen"), initializers.AbsensiController.GetAbsenceByAbsenceSessionId)
-	absence.GET("/session/:class_code", middlewares.Auth("Mahasiswa"), initializers.AbsensiController.GetAbsenceSessionByClassCode)
+	absence.GET("/session/:class_code", middlewares.Auth("Dosen"), initializers.AbsensiController.GetAbsenceSessionByClassCode)
 
 	return router
 

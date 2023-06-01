@@ -11,6 +11,7 @@ import (
 	absensi_repository "projects-subscribeme-backend/repositories/absence_repository"
 	"time"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -23,6 +24,12 @@ func NewAbsensiService(repository absensi_repository.AbsensiRepository) AbsensiS
 }
 
 func (s *absensiService) CreateAbsenceSession(payload payload.ClassAbsenceSessionPayload, claims *helper.JWTClaim) (*response.ClassAbsenceSessionResponse, error) {
+	_, err := s.CheckAbsenceIsOpen(payload.ClassCode)
+	if err != nil {
+		log.Println(string("\033[31m"), err.Error())
+		return nil, err
+	}
+
 	model := models.ClassAbsenceSession{
 		TeacherName: claims.Nama,
 		ClassCode:   payload.ClassCode,
@@ -90,7 +97,7 @@ func (s *absensiService) UpdateAbsence(payload payload.AbsencePayload, claims *h
 		return nil, err
 	}
 
-	if absenceSession.EndTime.After(time.Now()) {
+	if absenceSession.EndTime.Before(time.Now()) {
 		return nil, errors.New("403")
 	}
 
@@ -125,10 +132,14 @@ func (s *absensiService) CheckAbsenceIsOpen(classCode string) (*response.ClassAb
 
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return &response.ClassAbsenceSessionResponse{}, nil
+			return &response.ClassAbsenceSessionResponse{}, errors.New("404")
 		}
 		log.Println(string("\033[31m"), err.Error())
 		return nil, err
+	}
+
+	if absenceClass.ID == uuid.Nil {
+		return &response.ClassAbsenceSessionResponse{}, errors.New("404")
 	}
 
 	return response.NewClassAbsenceSessionResponse(absenceClass), nil

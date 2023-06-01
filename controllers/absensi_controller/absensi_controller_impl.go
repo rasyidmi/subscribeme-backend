@@ -36,6 +36,10 @@ func (c *absensiController) CreateAbsenceSession(ctx *gin.Context) {
 			response.Error(ctx, "failed", http.StatusBadRequest, errors.New("payload error"))
 			ctx.Abort()
 			return
+		} else if err.Error() == "204" {
+			response.Error(ctx, "failed", http.StatusNotFound, errors.New("No absence is open"))
+			ctx.Abort()
+			return
 		}
 		response.Error(ctx, "failed", http.StatusInternalServerError, err)
 		ctx.Abort()
@@ -63,8 +67,8 @@ func (c *absensiController) UpdateAbsence(ctx *gin.Context) {
 			response.Error(ctx, "failed", http.StatusBadRequest, errors.New("payload error"))
 			ctx.Abort()
 			return
-		} else if err.Error() == "403" {
-			response.Error(ctx, "failed", http.StatusForbidden, errors.New("absence closed"))
+		} else if err.Error() == "404" {
+			response.Error(ctx, "failed", http.StatusForbidden, errors.New("there's still another absence session that are open"))
 			ctx.Abort()
 			return
 		}
@@ -82,6 +86,11 @@ func (c *absensiController) CheckAbsenceIsOpen(ctx *gin.Context) {
 
 	data, err := c.service.CheckAbsenceIsOpen(classCode)
 	if err != nil {
+		if err.Error() == "404" {
+			response.Error(ctx, "failed", http.StatusNotFound, errors.New("No absence session opened"))
+			ctx.Abort()
+			return
+		}
 		response.Error(ctx, "failed", http.StatusInternalServerError, err)
 		ctx.Abort()
 		return
