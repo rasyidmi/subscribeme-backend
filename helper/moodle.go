@@ -11,7 +11,7 @@ import (
 	"projects-subscribeme-backend/models"
 )
 
-func GetMoodleData[T []models.CourseMoodle | models.ListCourses | []models.CourseQuizzez | models.Moodle](api constant.MoodleEnum, data map[string]interface{}) (*T, error) {
+func GetMoodleData[T []models.CourseMoodle | models.ListCourses | models.ListQuizzez | models.Moodle](api constant.MoodleEnum, data map[string]interface{}) (*T, error) {
 	client := &http.Client{}
 
 	var req *http.Request
@@ -19,7 +19,6 @@ func GetMoodleData[T []models.CourseMoodle | models.ListCourses | []models.Cours
 	token := "090a3215b2b7c80afc5cb77ff3b86009"
 
 	if api == constant.GetCourseByUserid {
-		log.Println(data["user_id"])
 		reqs, err := http.NewRequest("GET", fmt.Sprintf(constant.GetCourseByUserid.String(), token, data["user_id"]), nil)
 		if err != nil {
 			return nil, err
@@ -33,6 +32,12 @@ func GetMoodleData[T []models.CourseMoodle | models.ListCourses | []models.Cours
 		req = reqs
 	} else if api == constant.GetAssignmentFromCourseID {
 		reqs, err := http.NewRequest("GET", fmt.Sprintf(constant.GetAssignmentFromCourseID.String(), token, data["course_id"]), nil)
+		if err != nil {
+			return nil, err
+		}
+		req = reqs
+	} else if api == constant.GetQuizFromCourseID {
+		reqs, err := http.NewRequest("GET", fmt.Sprintf(constant.GetQuizFromCourseID.String(), token, data["course_id"]), nil)
 		if err != nil {
 			return nil, err
 		}

@@ -3,6 +3,6 @@ package constant
 type EventEnum string
 
 const (
-	AssignmentType EventEnum = "Assignemnt"
+	AssignmentType EventEnum = "Assignment"
 	QuizType       EventEnum = "Quiz"
 )

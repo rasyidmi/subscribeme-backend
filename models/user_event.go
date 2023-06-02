@@ -1,20 +1,18 @@
 package models
 
 import (
-	"time"
-
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
 type UserEvent struct {
-	ID         uuid.UUID `gorm:"primaryKey"`
-	UserID     string    `gorm:"not null"`
-	EventID    int64     `gorm:"not null"`
-	CourseID   int64     `gorm:"not null"`
-	CourseName string    `gorm:"not null"`
-	EventName  string    `gorm:"not null"`
-	Date       time.Time `gorm:"not null"`
+	ID         uuid.UUID   `gorm:"primaryKey"`
+	UserID     string      `gorm:"not null"`
+	EventID    string      `gorm:"not null"`
+	CourseID   string      `gorm:"not null"`
+	IsDone     bool        `gorm:"not null"`
+	User       *User       `gorm:"foreignKey:UserID"`
+	ClassEvent *ClassEvent `gorm:"foreignKey:EventID"`
 }
 
 func (userEvent *UserEvent) BeforeCreate(tx *gorm.DB) (err error) {

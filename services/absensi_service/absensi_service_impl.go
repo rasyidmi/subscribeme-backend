@@ -2,7 +2,6 @@ package absensi_service
 
 import (
 	"errors"
-	"fmt"
 	"log"
 	"projects-subscribeme-backend/constant"
 	"projects-subscribeme-backend/dto/payload"
@@ -12,7 +11,6 @@ import (
 	absensi_repository "projects-subscribeme-backend/repositories/absence_repository"
 	"time"
 
-	"github.com/TigorLazuardi/tanggal"
 	"github.com/google/uuid"
 	"github.com/jftuga/geodist"
 	"gorm.io/gorm"
@@ -82,18 +80,13 @@ func (s *absensiService) createAbsence(payload models.ClassAbsenceSession, absen
 
 	classParticipant := *model
 
-	tgl, err := tanggal.Papar(absenceOpenTime, "Jakarta", tanggal.WIB)
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	absences := []models.Absence{}
 	for _, val := range classParticipant {
 		absence := &models.Absence{
 			ClassAbsenceSessionID: payload.ID.String(),
 			StudentName:           val.Student[0].Name,
 			StudentNpm:            val.Student[0].Npm,
-			ClassDate:             fmt.Sprintf("%s, %d %s %d", tgl.NamaHari, tgl.Hari, tgl.NamaBulan, tgl.Tahun),
+			ClassDate:             absenceOpenTime,
 			Present:               false,
 		}
 

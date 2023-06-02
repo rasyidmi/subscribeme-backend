@@ -19,3 +19,11 @@ func NewCourseSceleResponse(model models.CourseScele) *CourseSceleResponse {
 
 	return &response
 }
+
+func NewCourseSceleResponses(models []*models.CourseScele) *[]CourseSceleResponse {
+	var responses []CourseSceleResponse
+
+	copier.Copy(&responses, models)
+
+	return &responses
+}

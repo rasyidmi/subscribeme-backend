@@ -4,6 +4,10 @@ type ListCourses struct {
 	Courses []CourseMoodle `json:"courses"`
 }
 
+type ListQuizzez struct {
+	CourseQuizzez []CourseQuizzez `json:"quizzes"`
+}
+
 type CourseMoodle struct {
 	ID          int                `json:"id"`
 	Name        string             `json:"fullname"`

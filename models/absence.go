@@ -27,8 +27,8 @@ type Absence struct {
 	Latitude              float64 `gorm:"default:null"`
 	Longitude             float64 `gorm:"default:null"`
 	DeviceCode            string
-	ClassDate             string
-	PresentTime           time.Time
+	ClassDate             time.Time
+	PresentTime           time.Time `gorm:"default:null"`
 	Present               bool
 }
 

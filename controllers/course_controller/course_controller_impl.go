@@ -60,3 +60,57 @@ func (c *courseController) SubscribeCourse(ctx *gin.Context) {
 
 	response.Success(ctx, "success", http.StatusOK, data)
 }
+
+func (c *courseController) GetUserCourseByUsername(ctx *gin.Context) {
+	claims := helper.GetTokenClaims(ctx)
+	data, err := c.service.GetUserCourseByUsername(claims)
+	if err != nil {
+
+		response.Error(ctx, "failed", http.StatusInternalServerError, err)
+		ctx.Abort()
+		return
+	}
+
+	response.Success(ctx, "success", http.StatusOK, data)
+}
+
+func (c *courseController) GetUserEventByCourseId(ctx *gin.Context) {
+	param := ctx.Param("course_id")
+	claims := helper.GetTokenClaims(ctx)
+	data, err := c.service.GetUserEventByCourseId(claims, param)
+	if err != nil {
+
+		response.Error(ctx, "failed", http.StatusInternalServerError, err)
+		ctx.Abort()
+		return
+	}
+
+	response.Success(ctx, "success", http.StatusOK, data)
+
+}
+
+func (c *courseController) GetDeadlineTodayByUserId(ctx *gin.Context) {
+	claims := helper.GetTokenClaims(ctx)
+	data, err := c.service.GetDeadlineTodayByUserId(claims)
+	if err != nil {
+
+		response.Error(ctx, "failed", http.StatusInternalServerError, err)
+		ctx.Abort()
+		return
+	}
+
+	response.Success(ctx, "success", http.StatusOK, data)
+}
+
+func (c *courseController) GetDeadline7DaysAheadByUserId(ctx *gin.Context) {
+	claims := helper.GetTokenClaims(ctx)
+	data, err := c.service.GetDeadline7DaysAheadByUserId(claims)
+	if err != nil {
+
+		response.Error(ctx, "failed", http.StatusInternalServerError, err)
+		ctx.Abort()
+		return
+	}
+
+	response.Success(ctx, "success", http.StatusOK, data)
+}

@@ -44,7 +44,7 @@ func connectDatabase() *gorm.DB {
 
 func migrateDatabase(db *gorm.DB) {
 
-	errMigrate := db.AutoMigrate(&models.User{}, &models.ClassAbsenceSession{}, &models.Absence{}, &models.CourseScele{}, &models.ClassEvent{})
+	errMigrate := db.AutoMigrate(&models.User{}, &models.ClassAbsenceSession{}, &models.Absence{}, &models.CourseScele{}, &models.ClassEvent{}, &models.UserEvent{})
 
 	if errMigrate != nil {
 		log.Fatal("Gagal Migrate")

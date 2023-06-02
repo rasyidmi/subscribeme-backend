@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 type ClassEvent struct {
@@ -14,4 +15,10 @@ type ClassEvent struct {
 	Date          time.Time
 	EventName     string
 	CourseScele   *CourseScele
+}
+
+func (classEvent *ClassEvent) BeforeCreate(tx *gorm.DB) (err error) {
+	// UUID version 4
+	classEvent.ID = uuid.New()
+	return
 }

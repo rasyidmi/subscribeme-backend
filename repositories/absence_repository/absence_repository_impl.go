@@ -69,7 +69,7 @@ func (r *absensiRepository) GetAbsenceSessionByClassCode(classCode string) ([]mo
 func (r *absensiRepository) GetAbsenceByClassCodeAndNpm(classCode string, npm string) ([]models.Absence, error) {
 	var absences []models.Absence
 
-	err := r.db.Raw("select a.* from absences a JOIN class_absence_sessions cas ON a.class_absence_session_id = cas.id AND cas.class_code = ? AND a.student_npm = ?", classCode, npm).Scan(&absences).Error
+	err := r.db.Raw("select a.* from absences a JOIN class_absence_sessions cas ON a.class_absence_session_id = cas.id AND cas.class_code = ? AND a.student_npm = ?", classCode, npm).Order("class_date DESC").Scan(&absences).Error
 
 	return absences, err
 }

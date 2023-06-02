@@ -1,9 +1,12 @@
 package response
 
 import (
+	"fmt"
+	"log"
 	"projects-subscribeme-backend/models"
 	"time"
 
+	"github.com/TigorLazuardi/tanggal"
 	"github.com/jinzhu/copier"
 )
 
@@ -31,7 +34,7 @@ type AbsenceResponse struct {
 	Longitude             float64   `json:"longitude"`
 	DeviceCode            string    `json:"device_code"`
 	PresentTime           time.Time `json:"present_time"`
-	ClassAbsenceOpenTime  time.Time `json:"class_absence_open_time"`
+	ClassDate             string    `json:"class_absence_open_time"`
 	Present               bool      `json:"present"`
 }
 
@@ -92,6 +95,11 @@ func NewClassAbsenceSessionResponses(model []models.ClassAbsenceSession, isPrelo
 func NewAbsenceResponse(model models.Absence) *AbsenceResponse {
 	var response AbsenceResponse
 	copier.Copy(&response, model)
+	tgl, err := tanggal.Papar(model.ClassDate, "Jakarta", tanggal.WIB)
+	if err != nil {
+		log.Fatal(err)
+	}
+	response.ClassDate = fmt.Sprintf("%s, %d %s %d", tgl.NamaHari, tgl.Hari, tgl.NamaBulan, tgl.Tahun)
 
 	return &response
 

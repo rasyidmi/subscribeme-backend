@@ -44,6 +44,10 @@ func RouterSetup() *gin.Engine {
 
 	course := api.Group("/course")
 	course.POST("/subscribe", middlewares.Auth("Mahasiswa"), initializers.CourseController.SubscribeCourse)
+	course.GET("", middlewares.Auth("Mahasiswa"), initializers.CourseController.GetUserCourseByUsername)
+	course.GET("/event/:course_id", middlewares.Auth("Mahasiswa"), initializers.CourseController.GetUserEventByCourseId)
+	course.GET("/deadline/today", middlewares.Auth("Mahasiswa"), initializers.CourseController.GetDeadlineTodayByUserId)
+	course.GET("/deadline/7-days", middlewares.Auth("Mahasiswa"), initializers.CourseController.GetDeadline7DaysAheadByUserId)
 
 	return router
 
