@@ -11,7 +11,7 @@ import (
 	"projects-subscribeme-backend/models"
 )
 
-func GetMoodleData[T []models.CourseMoodle | []models.CourseAssignment | []models.CourseQuizzez | models.Moodle](api constant.MoodleEnum, data map[string]interface{}) (*T, error) {
+func GetMoodleData[T []models.CourseMoodle | models.ListCourses | []models.CourseQuizzez | models.Moodle](api constant.MoodleEnum, data map[string]interface{}) (*T, error) {
 	client := &http.Client{}
 
 	var req *http.Request
@@ -27,6 +27,12 @@ func GetMoodleData[T []models.CourseMoodle | []models.CourseAssignment | []model
 		req = reqs
 	} else if api == constant.GetUserDetailByUsername {
 		reqs, err := http.NewRequest("GET", fmt.Sprintf(constant.GetUserDetailByUsername.String(), token, data["username"]), nil)
+		if err != nil {
+			return nil, err
+		}
+		req = reqs
+	} else if api == constant.GetAssignmentFromCourseID {
+		reqs, err := http.NewRequest("GET", fmt.Sprintf(constant.GetAssignmentFromCourseID.String(), token, data["course_id"]), nil)
 		if err != nil {
 			return nil, err
 		}

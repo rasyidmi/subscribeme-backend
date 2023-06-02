@@ -65,6 +65,19 @@ func (s *courseService) SubscribeCourse(claims *helper.JWTClaim, payload payload
 		return nil, err
 	}
 
+	//Scele Assignment to Event type Assignment
+	var data = map[string]interface{}{}
+
+	data["course_id"] = courseScele.CourseSceleID
+
+	assignment, err := helper.GetMoodleData[models.ListCourses](constant.GetAssignmentFromCourseID, data)
+	if err != nil {
+		log.Println(string("\033[31m"), err.Error())
+		return nil, err
+	}
+	log.Println("MASUK")
+	log.Println(assignment)
+
 	return response.NewCourseSceleResponse(course), nil
 
 }

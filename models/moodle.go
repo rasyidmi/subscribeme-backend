@@ -1,5 +1,9 @@
 package models
 
+type ListCourses struct {
+	Courses []CourseMoodle `json:"courses"`
+}
+
 type CourseMoodle struct {
 	ID          int                `json:"id"`
 	Name        string             `json:"fullname"`
