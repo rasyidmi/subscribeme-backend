@@ -240,7 +240,6 @@ func (s *absensiService) GetClassDetailByNpmMahasiswa(npm string) (*[]response.C
 		return nil, err
 	}
 
-
 	return response.NewClassDetailResponses(*models), nil
 }
 
@@ -258,8 +257,6 @@ func (s *absensiService) GetClassDetailByNimDosen(nim string) (*[]response.Class
 		return nil, err
 	}
 
-
-
 	return response.NewClassDetailResponses(*models), nil
 
 }
@@ -275,8 +272,6 @@ func (s *absensiService) GetClassParticipantByClassCode(classCode string) (*[]re
 		log.Println(string("\033[31m"), err.Error())
 		return nil, err
 	}
-
-
 
 	return response.NewClassParticipantResponses(*models), nil
 }

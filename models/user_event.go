@@ -10,7 +10,8 @@ import (
 type UserEvent struct {
 	ID         uuid.UUID `gorm:"primaryKey"`
 	UserID     string    `gorm:"not null"`
-	EventID    int       `gorm:"not null"`
+	EventID    int64     `gorm:"not null"`
+	CourseID   int64     `gorm:"not null"`
 	CourseName string    `gorm:"not null"`
 	EventName  string    `gorm:"not null"`
 	Date       time.Time `gorm:"not null"`

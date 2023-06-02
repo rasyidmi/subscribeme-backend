@@ -8,9 +8,10 @@ import (
 )
 
 type ClassEvent struct {
-	ID          uuid.UUID `gorm:"primaryKey"`
-	Type        constant.EventEnum
-	Date        time.Time
-	EventName   string
-	CourseScele []*CourseScele `gorm:"many2many:class_events"`
+	ID            uuid.UUID `gorm:"primaryKey"`
+	CourseSceleID string
+	Type          constant.EventEnum
+	Date          time.Time
+	EventName     string
+	CourseScele   *CourseScele
 }

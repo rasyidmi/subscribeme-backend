@@ -1,5 +1,6 @@
 package payload
 
 type ChooseCourse struct {
-	ListId []string `json:"list_id"`
+	Id   int64  `json:"id"`
+	Name string `json:"name"`
 }

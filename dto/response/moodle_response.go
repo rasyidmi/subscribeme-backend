@@ -24,8 +24,16 @@ type CourseQuizzez struct {
 	TimeOpen int64  `json:"timeopen"`
 }
 
-func NewCourseMoodleResponse(model []models.CourseMoodle) *[]CourseMoodleResponse {
+func NewCourseMoodleResponses(model []models.CourseMoodle) *[]CourseMoodleResponse {
 	var response []CourseMoodleResponse
+
+	copier.Copy(&response, model)
+
+	return &response
+}
+
+func NewCourseMoodleResponse(model models.CourseMoodle) *CourseMoodleResponse {
+	var response CourseMoodleResponse
 
 	copier.Copy(&response, model)
 

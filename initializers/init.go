@@ -6,6 +6,7 @@ import (
 	"projects-subscribeme-backend/controllers/course_controller"
 	"projects-subscribeme-backend/controllers/user_controller"
 	absensi_repository "projects-subscribeme-backend/repositories/absence_repository"
+	"projects-subscribeme-backend/repositories/course_repository"
 	"projects-subscribeme-backend/repositories/user_repository"
 	"projects-subscribeme-backend/services/absensi_service"
 	"projects-subscribeme-backend/services/course_service"
@@ -28,6 +29,7 @@ var absensiRepository absensi_repository.AbsensiRepository
 //Courses
 var CourseController course_controller.CourseController
 var courseService course_service.CourseService
+var courseRepository course_repository.CourseRepository
 
 func Setup() {
 	err := godotenv.Load()
@@ -50,12 +52,13 @@ func initRepositories() {
 
 	userRepository = user_repository.NewUserRepository(db)
 	absensiRepository = absensi_repository.NewAbsenceRepository(db)
+	courseRepository = course_repository.NewCourseRepository(db)
 }
 
 func initServices() {
 	userService = user_service.NewUserService(userRepository)
 	absensiService = absensi_service.NewAbsensiService(absensiRepository)
-	courseService = course_service.NewCourseService()
+	courseService = course_service.NewCourseService(courseRepository, userRepository)
 }
 
 func initController() {

@@ -3,6 +3,7 @@ package course_controller
 import (
 	"errors"
 	"net/http"
+	"projects-subscribeme-backend/dto/payload"
 	"projects-subscribeme-backend/dto/response"
 	"projects-subscribeme-backend/helper"
 	"projects-subscribeme-backend/services/course_service"
@@ -36,4 +37,26 @@ func (c *courseController) GetCourseByUsername(ctx *gin.Context) {
 
 	response.Success(ctx, "success", http.StatusOK, data)
 
+}
+
+func (c *courseController) SubscribeCourse(ctx *gin.Context) {
+	var payload payload.ChooseCourse
+
+	if err := ctx.Bind(&payload); err != nil {
+		response.Error(ctx, "failed", http.StatusBadRequest, err)
+		ctx.Abort()
+		return
+	}
+
+	claims := helper.GetTokenClaims(ctx)
+
+	data, err := c.service.SubscribeCourse(claims, payload)
+	if err != nil {
+
+		response.Error(ctx, "failed", http.StatusInternalServerError, err)
+		ctx.Abort()
+		return
+	}
+
+	response.Success(ctx, "success", http.StatusOK, data)
 }

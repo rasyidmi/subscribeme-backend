@@ -34,7 +34,7 @@ func connectDatabase() *gorm.DB {
 		log.Fatal("Koneksi DB Gagal")
 	}
 
-	// migrateDatabase(tx)
+	migrateDatabase(tx)
 
 	// initJobs()
 
@@ -44,7 +44,7 @@ func connectDatabase() *gorm.DB {
 
 func migrateDatabase(db *gorm.DB) {
 
-	errMigrate := db.AutoMigrate(&models.User{}, &models.ClassAbsenceSession{}, &models.Absence{})
+	errMigrate := db.AutoMigrate(&models.User{}, &models.ClassAbsenceSession{}, &models.Absence{}, &models.CourseScele{}, &models.ClassEvent{})
 
 	if errMigrate != nil {
 		log.Fatal("Gagal Migrate")

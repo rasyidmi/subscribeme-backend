@@ -42,6 +42,9 @@ func RouterSetup() *gin.Engine {
 	moodle := api.Group("/moodle")
 	moodle.GET("/courses/username", middlewares.Auth("Mahasiswa"), initializers.CourseController.GetCourseByUsername)
 
+	course := api.Group("/course")
+	course.POST("/subscribe", middlewares.Auth("Mahasiswa"), initializers.CourseController.SubscribeCourse)
+
 	return router
 
 }
