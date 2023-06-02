@@ -12,5 +12,5 @@ type ClassEvent struct {
 	Type        constant.EventEnum
 	Date        time.Time
 	EventName   string
-	CourseScele []*CourseScele `gorm:"many2many:class_events`
+	CourseScele []*CourseScele `gorm:"many2many:class_events"`
 }
