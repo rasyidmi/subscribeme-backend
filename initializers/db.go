@@ -34,9 +34,9 @@ func connectDatabase() *gorm.DB {
 		log.Fatal("Koneksi DB Gagal")
 	}
 
-	migrateDatabase(tx)
+	// migrateDatabase(tx)
 
-	initJobs()
+	// initJobs()
 
 	return tx
 

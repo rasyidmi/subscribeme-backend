@@ -3,10 +3,12 @@ package initializers
 import (
 	"log"
 	"projects-subscribeme-backend/controllers/absensi_controller"
+	"projects-subscribeme-backend/controllers/course_controller"
 	"projects-subscribeme-backend/controllers/user_controller"
 	absensi_repository "projects-subscribeme-backend/repositories/absence_repository"
 	"projects-subscribeme-backend/repositories/user_repository"
 	"projects-subscribeme-backend/services/absensi_service"
+	"projects-subscribeme-backend/services/course_service"
 	"projects-subscribeme-backend/services/user_service"
 	"time"
 
@@ -22,6 +24,10 @@ var userRepository user_repository.UserRepository
 var AbsensiController absensi_controller.AbsensiController
 var absensiService absensi_service.AbsensiService
 var absensiRepository absensi_repository.AbsensiRepository
+
+//Courses
+var CourseController course_controller.CourseController
+var courseService course_service.CourseService
 
 func Setup() {
 	err := godotenv.Load()
@@ -49,9 +55,11 @@ func initRepositories() {
 func initServices() {
 	userService = user_service.NewUserService(userRepository)
 	absensiService = absensi_service.NewAbsensiService(absensiRepository)
+	courseService = course_service.NewCourseService()
 }
 
 func initController() {
 	UserController = user_controller.NewUserController(userService)
 	AbsensiController = absensi_controller.NewAbsensiController(absensiService)
+	CourseController = course_controller.NewCourseController(courseService)
 }

@@ -133,14 +133,14 @@ func (s *absensiService) UpdateAbsence(payload payload.AbsencePayload, claims *h
 		}
 		//TODO Check Virsanti
 		classRoomLoc := geodist.Coord{Lat: absenceSession.Latitude, Lon: absenceSession.Longitude}
-		studentLoca := geodist.Coord{Lat:payload.Latitude, Lon: payload.Longitude}
+		studentLoca := geodist.Coord{Lat: payload.Latitude, Lon: payload.Longitude}
 
 		_, km, err := geodist.VincentyDistance(classRoomLoc, studentLoca)
 		if err != nil {
 			return nil, errors.New("error to compute distance")
 		}
 
-		if km * 1000 > absenceSession.GeoRadius {
+		if km*1000 > absenceSession.GeoRadius {
 			return nil, errors.New("Your distance is too far from classroom")
 		}
 
@@ -240,9 +240,6 @@ func (s *absensiService) GetClassDetailByNpmMahasiswa(npm string) (*[]response.C
 		return nil, err
 	}
 
-	if len(*models) == 0 {
-		return nil, errors.New("404")
-	}
 
 	return response.NewClassDetailResponses(*models), nil
 }
@@ -261,9 +258,7 @@ func (s *absensiService) GetClassDetailByNimDosen(nim string) (*[]response.Class
 		return nil, err
 	}
 
-	if len(*models) == 0 {
-		return nil, errors.New("404")
-	}
+
 
 	return response.NewClassDetailResponses(*models), nil
 
@@ -281,10 +276,7 @@ func (s *absensiService) GetClassParticipantByClassCode(classCode string) (*[]re
 		return nil, err
 	}
 
-	if len(*models) == 0 {
-		log.Println(string("\033[31m"), err.Error())
-		return nil, errors.New("404")
-	}
+
 
 	return response.NewClassParticipantResponses(*models), nil
 }

@@ -39,6 +39,9 @@ func RouterSetup() *gin.Engine {
 	absence.GET("/session-id/:absence_session_id", middlewares.Auth("Dosen"), initializers.AbsensiController.GetAbsenceSessionDetailByAbsenceSessionId)
 	absence.GET("/session/:class_code", middlewares.Auth("Dosen"), initializers.AbsensiController.GetAbsenceSessionByClassCode)
 
+	moodle := api.Group("/moodle")
+	moodle.GET("/courses/username", middlewares.Auth("Mahasiswa"), initializers.CourseController.GetCourseByUsername)
+
 	return router
 
 }
