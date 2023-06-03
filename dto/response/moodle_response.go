@@ -7,9 +7,10 @@ import (
 )
 
 type CourseMoodleResponse struct {
-	ID          int                `json:"id"`
-	Name        string             `json:"name"`
-	Assignments []CourseAssignment `json:"assignments,omitempty"`
+	ID           int64              `json:"id"`
+	Name         string             `json:"name"`
+	IsSubscribed bool               `json:"is_subscribed"`
+	Assignments  []CourseAssignment `json:"assignments,omitempty"`
 }
 
 type CourseAssignment struct {
@@ -24,10 +25,18 @@ type CourseQuizzez struct {
 	TimeOpen int64  `json:"timeopen"`
 }
 
-func NewCourseMoodleResponses(model []models.CourseMoodle) *[]CourseMoodleResponse {
+func NewCourseMoodleResponses(model []models.CourseMoodle, subscribedCourses []*models.CourseScele) *[]CourseMoodleResponse {
 	var response []CourseMoodleResponse
 
 	copier.Copy(&response, model)
+
+	for _, v := range response {
+		for _, subscribeCourse := range subscribedCourses {
+			if v.ID == subscribeCourse.CourseSceleID {
+				v.IsSubscribed = true
+			}
+		}
+	}
 
 	return &response
 }

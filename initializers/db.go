@@ -11,6 +11,8 @@ import (
 	"gorm.io/gorm"
 )
 
+var DB *gorm.DB
+
 func connectDatabase() *gorm.DB {
 	postgresConfig := config.LoadPostgresConfig()
 
@@ -36,6 +38,8 @@ func connectDatabase() *gorm.DB {
 
 	migrateDatabase(tx)
 
+	DB = tx
+
 	// initJobs()
 
 	return tx
@@ -44,7 +48,7 @@ func connectDatabase() *gorm.DB {
 
 func migrateDatabase(db *gorm.DB) {
 
-	errMigrate := db.AutoMigrate(&models.User{}, &models.ClassAbsenceSession{}, &models.Absence{}, &models.CourseScele{}, &models.ClassEvent{}, &models.UserEvent{})
+	errMigrate := db.AutoMigrate(&models.User{}, &models.ClassAbsenceSession{}, &models.Absence{}, &models.CourseScele{}, &models.ClassEvent{}, &models.UserEvent{}, &models.Job{})
 
 	if errMigrate != nil {
 		log.Fatal("Gagal Migrate")

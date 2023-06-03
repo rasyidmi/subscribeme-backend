@@ -5,6 +5,7 @@ import (
 	"projects-subscribeme-backend/controllers/absensi_controller"
 	"projects-subscribeme-backend/controllers/course_controller"
 	"projects-subscribeme-backend/controllers/user_controller"
+	"projects-subscribeme-backend/helper"
 	absensi_repository "projects-subscribeme-backend/repositories/absence_repository"
 	"projects-subscribeme-backend/repositories/course_repository"
 	"projects-subscribeme-backend/repositories/user_repository"
@@ -45,6 +46,7 @@ func Setup() {
 	initRepositories()
 	initServices()
 	initController()
+	helper.InitFirebase()
 }
 
 func initRepositories() {

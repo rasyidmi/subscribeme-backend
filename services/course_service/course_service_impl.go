@@ -45,7 +45,12 @@ func (s *courseService) GetCoursesByUsername(claims *helper.JWTClaim) (*[]respon
 		return nil, err
 	}
 
-	return response.NewCourseMoodleResponses(*courseMoodle), nil
+	userCourses, err := s.repository.GetUserCourseByUsername(claims.Username)
+	if err != nil {
+		log.Println(string("\033[31m"), err.Error())
+	}
+
+	return response.NewCourseMoodleResponses(*courseMoodle, userCourses), nil
 
 }
 
@@ -154,8 +159,6 @@ func (s *courseService) GetUserCourseByUsername(claims *helper.JWTClaim) (*[]res
 	if err != nil {
 		log.Println(string("\033[31m"), err.Error())
 	}
-
-	log.Println(userCourse)
 
 	return response.NewCourseSceleResponses(userCourse), nil
 

@@ -3,6 +3,7 @@ package main
 import (
 	"projects-subscribeme-backend/initializers"
 	"projects-subscribeme-backend/routers"
+	"time"
 )
 
 // main
@@ -42,42 +43,10 @@ func main() {
 	initializers.Setup()
 	router := routers.RouterSetup()
 
-	// //Test job
-	// welcomeEmailJobs, err := jobs.RegisterType("welcomeEmail", 3, func(name string) error {
-
-	// 	if err := testJob(name); err != nil {
-	// 		log.Println(err.Error())
-	// 		return errors.New("error registering")
-	// 	}
-	// 	return nil
-	// })
-
-	// if err != nil {
-	// 	log.Println(err.Error())
-	// }
-
-	// job, err := welcomeEmailJobs.ScheduleRecurring(100, time.Now().Add(10*time.Second), 5*time.Second, "jacess")
-	// if err != nil {
-	// 	// Handle err
-	// 	log.Println(err.Error())
-	// }
-
-	// pool, err := jobs.NewPool(nil)
-	// if err != nil {
-	// 	// Handle err
-	// 	log.Println(err.Error())
-	// }
-	// defer func() {
-	// 	pool.Close()
-	// 	if err := pool.Wait(); err != nil {
-	// 		// Handle err
-	// 		log.Println(err.Error())
-	// 	}
-	// }()
-	// if err := pool.Start(); err != nil {
-	// 	// Handle err
-	// 	log.Println(err.Error())
-	// }
-
 	router.Run()
+}
+
+type Schedule struct {
+	Name string
+	Time time.Time
 }
