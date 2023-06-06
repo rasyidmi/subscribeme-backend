@@ -18,9 +18,10 @@ type ClassDetail struct {
 }
 
 type Course struct {
-	CourseCode string `json:"kd_mk"`
-	CourseName string `json:"nm_mk"`
-	CourseSKS  int    `json:"jml_sks"`
+	CourseCode     string `json:"kd_mk"`
+	CourseName     string `json:"nm_mk"`
+	CourseSKS      int    `json:"jml_sks"`
+	CurriculumCode string `json:"kd_kur"`
 }
 
 type Lecturers struct {

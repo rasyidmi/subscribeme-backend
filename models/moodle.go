@@ -15,15 +15,17 @@ type CourseMoodle struct {
 }
 
 type CourseAssignment struct {
-	ID      int    `json:"id"`
-	Name    string `json:"name"`
-	DueDate int64  `json:"duedate"`
+	ID           int64  `json:"cmid"`
+	Name         string `json:"name"`
+	DueDate      int64  `json:"duedate"`
+	TimeModified int64  `json:"timemodified"`
 }
 
 type CourseQuizzez struct {
-	ID       int    `json:"id"`
-	Name     string `json:"name"`
-	TimeOpen int64  `json:"timeopen"`
+	ID           int64  `json:"coursemodule"`
+	Name         string `json:"name"`
+	TimeOpen     int64  `json:"timeopen"`
+	TimeModified int64  `json:"timemodified"`
 }
 
 type Moodle struct {

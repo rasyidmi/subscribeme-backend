@@ -1,6 +1,8 @@
 package course_service
 
 import (
+	"encoding/json"
+	"errors"
 	"log"
 	"projects-subscribeme-backend/constant"
 	"projects-subscribeme-backend/dto/payload"
@@ -83,15 +85,16 @@ func (s *courseService) SubscribeCourse(claims *helper.JWTClaim, payload payload
 		return nil, err
 	}
 
-	newAssignment := *assignment
+	
 
-	if len(newAssignment.Courses[0].Assignments) != 0 {
-		for _, v := range newAssignment.Courses[0].Assignments {
+	if len(assignment.Courses[0].Assignments) != 0 {
+		for _, v := range assignment.Courses[0].Assignments {
 			event := models.ClassEvent{
-				CourseSceleID: course.ID.String(),
-				Type:          constant.AssignmentType,
-				Date:          time.Unix(v.DueDate, 0),
-				EventName:     v.Name,
+				CourseSceleID:  course.ID.String(),
+				Type:           constant.AssignmentType,
+				Date:           time.Unix(v.DueDate, 0),
+				EventName:      v.Name,
+				CourseModuleID: v.ID,
 			}
 
 			event, err := s.repository.FirstOrCreateEvent(event)
@@ -109,17 +112,15 @@ func (s *courseService) SubscribeCourse(claims *helper.JWTClaim, payload payload
 		return nil, err
 	}
 
-	newQuiz := *quiz
 
-	log.Println(newQuiz)
-
-	if len(newQuiz.CourseQuizzez) != 0 {
-		for _, v := range newQuiz.CourseQuizzez {
+	if len(quiz.CourseQuizzez) != 0 {
+		for _, v := range quiz.CourseQuizzez {
 			event := models.ClassEvent{
 				CourseSceleID: course.ID.String(),
 				Type:          constant.QuizType,
 				Date:          time.Unix(v.TimeOpen, 0),
 				EventName:     v.Name,
+				CourseModuleID: v.ID,
 			}
 
 			event, err := s.repository.FirstOrCreateEvent(event)
@@ -148,6 +149,37 @@ func (s *courseService) SubscribeCourse(claims *helper.JWTClaim, payload payload
 		if err != nil {
 			log.Println(string("\033[31m"), err.Error())
 		}
+	}
+
+	return response.NewCourseSceleResponse(course), nil
+
+}
+
+func (s *courseService) UnsibscribeCourse(claims *helper.JWTClaim, payload payload.ChooseCourse) (*response.CourseSceleResponse, error) {
+	course, err := s.repository.GetCourseByCourseSceleId(payload.Id)
+	if err != nil {
+		log.Println(string("\033[31m"), err.Error())
+	}
+
+	user, err := s.userRepository.GetUserByUsername(claims.Username)
+	if err != nil {
+		log.Println(string("\033[31m"), err.Error())
+		return nil, err
+	}
+
+	//Delete User Event
+	err = s.repository.DeleteUserEventByUserIdAndCourseId(user.ID.String(), course.ID.String())
+	if err != nil {
+		log.Println(string("\033[31m"), err.Error())
+		return nil, err
+	}
+
+	//Delete User Course
+
+	err = s.repository.DeletUserCourseByUserAndCourse(user, course)
+	if err != nil {
+		log.Println(string("\033[31m"), err.Error())
+		return nil, err
 	}
 
 	return response.NewCourseSceleResponse(course), nil
@@ -208,4 +240,37 @@ func (s *courseService) GetDeadline7DaysAheadByUserId(claims *helper.JWTClaim) (
 	}
 
 	return response.NewUserEventResponses(userEvent), nil
+}
+
+func (s *courseService) SetDeadlineReminder(claims *helper.JWTClaim, payload payload.ReminderPayload) (bool, error) {
+	if payload.SetTime.Before(time.Now()) {
+		return false, errors.New("400")
+	}
+
+	event, err := s.repository.GetEventByEventId(payload.EventID)
+	if err != nil {
+		log.Println(string("\033[31m"), err.Error())
+		return false, err
+	}
+
+	if event.Date.Before(payload.SetTime) {
+		return false, errors.New("409")
+	}
+
+	user, err := s.userRepository.GetUserByUsername(claims.Username)
+	if err != nil {
+		log.Println(string("\033[31m"), err.Error())
+		return false, err
+	}
+
+	jsonBytes, err := json.Marshal(event)
+	if err != nil {
+		log.Println(string("\033[31m"), err.Error())
+		return false, err
+	}
+
+	helper.SchedulerEvent.Schedule("ReminderEventSetDeadline", string(jsonBytes), payload.SetTime, user.ID.String(), event.ID.String())
+
+	return true, nil
+
 }

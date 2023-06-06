@@ -28,7 +28,7 @@ func RouterSetup() *gin.Engine {
 
 	siakng := api.Group("/siakng")
 	siakng.GET("/class/npm", middlewares.Auth("Mahasiswa"), initializers.AbsensiController.GetClassDetailByNpmMahasiswa)
-	siakng.GET("/class/participants/:class_code", middlewares.Auth("Mahasiswa"), initializers.AbsensiController.GetClassParticipantByClassCode)
+	siakng.GET("/class/participants/:class_code", middlewares.Auth("Dosen"), initializers.AbsensiController.GetClassParticipantByClassCode)
 	siakng.GET("/class/nim", middlewares.Auth("Dosen"), initializers.AbsensiController.GetClassDetailByNimDosen)
 
 	absence := api.Group("/absence")
@@ -44,10 +44,14 @@ func RouterSetup() *gin.Engine {
 
 	course := api.Group("/course")
 	course.POST("/subscribe", middlewares.Auth("Mahasiswa"), initializers.CourseController.SubscribeCourse)
+	course.POST("/unsubscribe", middlewares.Auth("Mahasiswa"), initializers.CourseController.UnsubscribeCourse)
 	course.GET("", middlewares.Auth("Mahasiswa"), initializers.CourseController.GetUserCourseByUsername)
 	course.GET("/event/:course_id", middlewares.Auth("Mahasiswa"), initializers.CourseController.GetUserEventByCourseId)
 	course.GET("/deadline/today", middlewares.Auth("Mahasiswa"), initializers.CourseController.GetDeadlineTodayByUserId)
 	course.GET("/deadline/7-days", middlewares.Auth("Mahasiswa"), initializers.CourseController.GetDeadline7DaysAheadByUserId)
+
+	reminder := api.Group("/reminder")
+	reminder.POST("", middlewares.Auth("Mahasiswa"), initializers.CourseController.SetDeadlineReminder)
 
 	return router
 

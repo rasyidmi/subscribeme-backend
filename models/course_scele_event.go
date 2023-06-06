@@ -9,12 +9,13 @@ import (
 )
 
 type ClassEvent struct {
-	ID            uuid.UUID `gorm:"primaryKey"`
-	CourseSceleID string
-	Type          constant.EventEnum
-	Date          time.Time
-	EventName     string
-	CourseScele   *CourseScele
+	ID             uuid.UUID `gorm:"primaryKey"`
+	CourseSceleID  string
+	CourseModuleID int64 `gorm:"unique"`
+	Type           constant.EventEnum
+	Date           time.Time
+	EventName      string
+	CourseScele    *CourseScele
 }
 
 func (classEvent *ClassEvent) BeforeCreate(tx *gorm.DB) (err error) {

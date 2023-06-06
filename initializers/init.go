@@ -47,10 +47,13 @@ func Setup() {
 	initServices()
 	initController()
 	helper.InitFirebase()
+	SetupScheduler()
+	
 }
 
 func initRepositories() {
 	db := connectDatabase()
+	DB = db
 
 	userRepository = user_repository.NewUserRepository(db)
 	absensiRepository = absensi_repository.NewAbsenceRepository(db)

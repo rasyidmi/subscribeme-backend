@@ -30,10 +30,10 @@ func NewCourseMoodleResponses(model []models.CourseMoodle, subscribedCourses []*
 
 	copier.Copy(&response, model)
 
-	for _, v := range response {
-		for _, subscribeCourse := range subscribedCourses {
-			if v.ID == subscribeCourse.CourseSceleID {
-				v.IsSubscribed = true
+	for i := 0; i < len(response); i++ {
+		for j := 0; j < len(subscribedCourses); j++ {
+			if response[i].ID == subscribedCourses[j].CourseSceleID {
+				response[i].IsSubscribed = true
 			}
 		}
 	}

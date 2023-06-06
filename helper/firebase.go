@@ -2,7 +2,6 @@ package helper
 
 import (
 	"context"
-	"projects-subscribeme-backend/constant"
 
 	firebase "firebase.google.com/go"
 	"firebase.google.com/go/messaging"
@@ -25,7 +24,7 @@ func InitFirebase() {
 	App = app
 }
 
-func SendPushNotification(data map[string]interface{}, notifType constant.NotificationEnum) error {
+func SendPushNotification(data map[string]string) error {
 
 	fcmCLient, err := App.Messaging(context.Background())
 	if err != nil {
@@ -35,10 +34,10 @@ func SendPushNotification(data map[string]interface{}, notifType constant.Notifi
 
 	messaging := &messaging.Message{
 		Notification: &messaging.Notification{
-			Title: data["title"].(string),
-			Body:  data["body"].(string),
+			Title: data["title"],
+			Body:  data["body"],
 		},
-		Token: data["token"].(string),
+		Token: data["token"],
 	}
 
 	fcmCLient.Send(context.Background(), messaging)

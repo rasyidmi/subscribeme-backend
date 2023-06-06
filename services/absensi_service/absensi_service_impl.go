@@ -11,6 +11,7 @@ import (
 	absensi_repository "projects-subscribeme-backend/repositories/absence_repository"
 	"time"
 
+	"github.com/fatih/structs"
 	"github.com/google/uuid"
 	"github.com/jftuga/geodist"
 	"gorm.io/gorm"
@@ -233,10 +234,16 @@ func (s *absensiService) GetClassDetailByNpmMahasiswa(npm string) (*[]response.C
 		return nil, err
 	}
 
+	classDetail := *models
+
+	m := structs.Map(classDetail[0])
+
+	helper.ReminderClassWillStarted(m)
+
 	return response.NewClassDetailResponses(*models), nil
 }
 
-func (s *absensiService) GetClassDetailByNimDosen(nim string) (*[]response.ClassDetailResponse, error) {
+func (s *absensiService) GetClassDetailByNimDosen(nim string) (*[]response.CourseResponseDosen, error) {
 	var data = map[string]interface{}{}
 
 	data["nim"] = nim
@@ -250,7 +257,7 @@ func (s *absensiService) GetClassDetailByNimDosen(nim string) (*[]response.Class
 		return nil, err
 	}
 
-	return response.NewClassDetailResponses(*models), nil
+	return response.NewCourceResponseDosen(*models), nil
 
 }
 

@@ -45,7 +45,7 @@ func (r *courseRepository) CreateCourse(course models.CourseScele, user models.U
 }
 
 func (r *courseRepository) FirstOrCreateEvent(event models.ClassEvent) (models.ClassEvent, error) {
-	err := r.db.FirstOrCreate(&event, models.ClassEvent{CourseSceleID: event.CourseSceleID, EventName: event.EventName, Date: event.Date}).Error
+	err := r.db.FirstOrCreate(&event, models.ClassEvent{CourseModuleID: event.CourseModuleID}).Error
 
 	return event, err
 }
@@ -104,4 +104,31 @@ func (r *courseRepository) GetDeadline7DaysAheadByUserId(userId string) ([]model
 
 	return userEvents, err
 
+}
+
+func (r *courseRepository) GetCourseByCourseSceleId(courseId int64) (models.CourseScele, error) {
+	var course models.CourseScele
+
+	err := r.db.First(&course, "course_scele_id = ?", courseId).Error
+
+	return course, err
+}
+
+func (r *courseRepository) DeleteUserEventByUserIdAndCourseId(userId string, courseId string) error {
+	err := r.db.Where("user_id = ? AND course_id = ?", userId, courseId).Delete(&models.UserEvent{}).Error
+
+	return err
+}
+
+func (r *courseRepository) DeletUserCourseByUserAndCourse(user models.User, course models.CourseScele) error {
+	err := r.db.Unscoped().Model(&user).Association("CourseScele").Delete(course)
+
+	return err
+}
+
+func (r *courseRepository) GetEventByEventId(eventId string) (models.ClassEvent, error) {
+	var classEvent models.ClassEvent
+	err := r.db.First(&classEvent, "id = ?", eventId).Error
+
+	return classEvent, err
 }

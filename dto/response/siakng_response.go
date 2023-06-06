@@ -1,6 +1,7 @@
 package response
 
 import (
+	"log"
 	"projects-subscribeme-backend/models"
 	"strings"
 
@@ -25,9 +26,18 @@ type ClassDetailResponse struct {
 }
 
 type CourseResponse struct {
-	CourseCode string `json:"course_code,omitempty"`
-	CourseName string `json:"course_name,omitempty"`
-	CourseSKS  int    `json:"total_sks,omitempty"`
+	CourseCode     string `json:"course_code,omitempty"`
+	CourseName     string `json:"course_name,omitempty"`
+	CourseSKS      int    `json:"total_sks,omitempty"`
+	CurriculumCode string `json:"curriculum_code,omitempty"`
+}
+
+type CourseResponseDosen struct {
+	CourseCode          string                `json:"course_code,omitempty"`
+	CourseName          string                `json:"course_name,omitempty"`
+	CourseSKS           int                   `json:"total_sks,omitempty"`
+	CurriculumCode      string                `json:"curriculum_code,omitempty"`
+	ClassDetailResponse []ClassDetailResponse `json:"class_detail,omitempty"`
 }
 
 type LecturersResponse struct {
@@ -107,6 +117,55 @@ func NewClassDetailResponses(models []models.ClassSchedule) *[]ClassDetailRespon
 		}
 	}
 
+	return &responses
+}
+
+func NewCourceResponseDosen(models []models.ClassSchedule) *[]CourseResponseDosen {
+	var responses []CourseResponseDosen
+
+	courseMap := make(map[string]int)
+	iterator := 0
+	iterator2 := 0
+
+	for _, v := range models {
+		var response CourseResponseDosen
+
+		val, ok := courseMap[v.ClassDetail.Course.CourseCode]
+
+		if ok {
+			classDetail := ClassDetailResponse{
+				ClassName: v.ClassDetail.ClassName,
+				ClassCode: v.ClassDetail.ClassCode,
+			}
+			copier.Copy(&classDetail.Lecturers, v.ClassDetail.Lecturers)
+			log.Println("Masuk ", responses[val].ClassDetailResponse[iterator2].ClassCode)
+			if responses[val].ClassDetailResponse[iterator2].ClassCode != v.ClassDetail.ClassCode {
+				responses[val].ClassDetailResponse = append(responses[val].ClassDetailResponse, classDetail)
+				iterator2++
+			}
+
+		} else {
+			courseMap[v.ClassDetail.Course.CourseCode] = iterator
+			response.CourseCode = v.ClassDetail.Course.CourseCode
+			response.CourseName = v.ClassDetail.Course.CourseName
+			response.CourseSKS = v.ClassDetail.Course.CourseSKS
+			response.CurriculumCode = v.ClassDetail.Course.CurriculumCode
+
+			classDetail := ClassDetailResponse{
+				ClassName: v.ClassDetail.ClassName,
+				ClassCode: v.ClassDetail.ClassCode,
+			}
+			copier.Copy(&classDetail.Lecturers, v.ClassDetail.Lecturers)
+			
+			response.ClassDetailResponse = append(response.ClassDetailResponse, classDetail)
+			iterator++
+			iterator2 = 0
+			responses = append(responses, response)
+
+		}
+		
+
+	}
 	return &responses
 }
 
