@@ -9,7 +9,8 @@ import (
 
 type User struct {
 	ID          uuid.UUID `gorm:"primaryKey"`
-	Username    string    `gorm:"unique"`
+	Username    string    `gorm:"uniqueIndex"`
+	Npm         string    `gorm:"uniqueIndex"`
 	Role        constant.UserRoleEnum
 	FcmToken    string         `gorm:"fcm_token"`
 	CourseScele []*CourseScele `gorm:"many2many:user_course;"`

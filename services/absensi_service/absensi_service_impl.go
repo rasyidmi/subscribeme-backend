@@ -1,6 +1,7 @@
 package absensi_service
 
 import (
+	"encoding/json"
 	"errors"
 	"log"
 	"projects-subscribeme-backend/constant"
@@ -9,6 +10,7 @@ import (
 	"projects-subscribeme-backend/helper"
 	"projects-subscribeme-backend/models"
 	absensi_repository "projects-subscribeme-backend/repositories/absence_repository"
+	"projects-subscribeme-backend/repositories/user_repository"
 	"time"
 
 	"github.com/fatih/structs"
@@ -18,11 +20,12 @@ import (
 )
 
 type absensiService struct {
-	repository absensi_repository.AbsensiRepository
+	repository     absensi_repository.AbsensiRepository
+	userRepository user_repository.UserRepository
 }
 
-func NewAbsensiService(repository absensi_repository.AbsensiRepository) AbsensiService {
-	return &absensiService{repository: repository}
+func NewAbsensiService(repository absensi_repository.AbsensiRepository, userRepository user_repository.UserRepository) AbsensiService {
+	return &absensiService{repository: repository, userRepository: userRepository}
 }
 
 func (s *absensiService) CreateAbsenceSession(payload payload.ClassAbsenceSessionPayload, claims *helper.JWTClaim) (*response.ClassAbsenceSessionResponse, error) {
@@ -40,7 +43,7 @@ func (s *absensiService) CreateAbsenceSession(payload payload.ClassAbsenceSessio
 
 	if !classSessionCheck {
 		log.Println(string("\033[31m"), errors.New("403"))
-		return nil, errors.New("403")
+		return nil, err
 	}
 
 	model := models.ClassAbsenceSession{
@@ -55,9 +58,10 @@ func (s *absensiService) CreateAbsenceSession(payload payload.ClassAbsenceSessio
 			return nil, errors.New("400")
 		}
 
-		model.Latitude = payload.Latitude
-		model.Longitude = payload.Longitude
-		model.GeoRadius = payload.GeoRadius
+		model.Latitude = &payload.Latitude
+		model.Longitude = &payload.Longitude
+		model.GeoRadius = &payload.GeoRadius
+		model.IsGeofence = payload.IsGeofence
 	}
 
 	absenceSession, err := s.repository.CreateAbsenceSession(model)
@@ -68,8 +72,42 @@ func (s *absensiService) CreateAbsenceSession(payload payload.ClassAbsenceSessio
 
 	go s.createAbsence(absenceSession, payload.StartTime)
 
-	return response.NewClassAbsenceSessionResponse(absenceSession, false), nil
+	return response.NewClassAbsenceSessionResponse(absenceSession, false, false), nil
 
+}
+
+func (s *absensiService) UpdateAbsenceSession(payload payload.ClassAbsenceSessionPayload, claims *helper.JWTClaim, id string) (*response.ClassAbsenceSessionResponse, error) {
+	model := models.ClassAbsenceSession{
+		TeacherName: claims.Nama,
+		ClassCode:   payload.ClassCode,
+		StartTime:   payload.StartTime,
+		EndTime:     payload.StartTime.Add(time.Minute * time.Duration(payload.Duration)),
+		Latitude:    nil,
+		Longitude:   nil,
+		GeoRadius:   nil,
+		IsGeofence:  false,
+	}
+
+	if payload.IsGeofence {
+		if payload.Latitude == 0 || payload.Longitude == 0 || payload.GeoRadius == 0 {
+			return nil, errors.New("400")
+		}
+
+		model.Latitude = &payload.Latitude
+		model.Longitude = &payload.Longitude
+		model.GeoRadius = &payload.GeoRadius
+		model.IsGeofence = payload.IsGeofence
+	}
+
+	absenceSession, err := s.repository.UpdateAbsenceSession(model, id)
+	if err != nil {
+		log.Println(string("\033[31m"), err.Error())
+		return nil, err
+	}
+
+	go s.createAbsence(absenceSession, payload.StartTime)
+
+	return response.NewClassAbsenceSessionResponse(absenceSession, false, false), nil
 }
 
 func (s *absensiService) createAbsence(payload models.ClassAbsenceSession, absenceOpenTime time.Time) (bool, error) {
@@ -89,6 +127,18 @@ func (s *absensiService) createAbsence(payload models.ClassAbsenceSession, absen
 			StudentNpm:            val.Student[0].Npm,
 			ClassDate:             absenceOpenTime,
 			Present:               false,
+		}
+
+		user, err := s.userRepository.GetUserByNpm(val.Student[0].Npm)
+		if err == nil {
+			jsonBytes, err := json.Marshal(payload)
+			if err != nil {
+				log.Println(string("\033[31m"), err.Error())
+				return false, err
+			}
+			endTime := payload.EndTime.Add(-time.Minute * 5)
+			helper.SchedulerEvent.Schedule("ReminderAbsenceCanBeDone", string(jsonBytes), payload.StartTime, user.ID.String(), "")
+			helper.SchedulerEvent.Schedule("ReminderAbsenceWillOver", string(jsonBytes), endTime, user.ID.String(), "")
 		}
 
 		absences = append(absences, *absence)
@@ -111,8 +161,8 @@ func (s *absensiService) UpdateAbsence(payload payload.AbsencePayload, claims *h
 		return nil, err
 	}
 
-	if absenceSession.EndTime.Before(time.Now()) {
-		return nil, errors.New("absence slot has ended")
+	if absenceSession.EndTime.Before(time.Now()) && absenceSession.StartTime.After(time.Now()) {
+		return nil, errors.New("absence slot not open yet or absence slot has ended")
 	}
 
 	absence := models.Absence{
@@ -126,7 +176,7 @@ func (s *absensiService) UpdateAbsence(payload payload.AbsencePayload, claims *h
 			return nil, errors.New("400")
 		}
 		//TODO Check Virsanti
-		classRoomLoc := geodist.Coord{Lat: absenceSession.Latitude, Lon: absenceSession.Longitude}
+		classRoomLoc := geodist.Coord{Lat: *absenceSession.Latitude, Lon: *absenceSession.Longitude}
 		studentLoca := geodist.Coord{Lat: payload.Latitude, Lon: payload.Longitude}
 
 		_, km, err := geodist.VincentyDistance(classRoomLoc, studentLoca)
@@ -134,7 +184,7 @@ func (s *absensiService) UpdateAbsence(payload payload.AbsencePayload, claims *h
 			return nil, errors.New("error to compute distance")
 		}
 
-		if km*1000 > absenceSession.GeoRadius {
+		if km*1000 > *absenceSession.GeoRadius {
 			return nil, errors.New("Your distance is too far from classroom")
 		}
 
@@ -168,7 +218,7 @@ func (s *absensiService) CheckAbsenceIsOpen(classCode string) (*response.ClassAb
 		return &response.ClassAbsenceSessionResponse{}, errors.New("404")
 	}
 
-	return response.NewClassAbsenceSessionResponse(absenceClass, false), nil
+	return response.NewClassAbsenceSessionResponse(absenceClass, false, false), nil
 
 }
 
@@ -197,7 +247,7 @@ func (s *absensiService) GetAbsenceSessionDetailByAbsenceSessionId(absenceSessio
 		return nil, err
 	}
 
-	return response.NewClassAbsenceSessionResponses(absenceSessions, true), nil
+	return response.NewClassAbsenceSessionResponses(absenceSessions, true, true), nil
 
 }
 
@@ -209,7 +259,7 @@ func (s *absensiService) GetAbsenceSessionByClassCode(classCode string) (*[]resp
 		return nil, err
 	}
 
-	return response.NewClassAbsenceSessionResponses(absenceSession, false), nil
+	return response.NewClassAbsenceSessionResponses(absenceSession, true, false), nil
 }
 
 func (s *absensiService) GetClassDetailByNpmMahasiswa(npm string) (*[]response.ClassDetailResponse, error) {

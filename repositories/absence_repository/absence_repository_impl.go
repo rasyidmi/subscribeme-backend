@@ -4,6 +4,7 @@ import (
 	"projects-subscribeme-backend/models"
 
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type absensiRepository struct {
@@ -20,8 +21,22 @@ func (r *absensiRepository) CreateAbsenceSession(absenceSession models.ClassAbse
 	return absenceSession, err
 }
 
+func (r *absensiRepository) UpdateAbsenceSession(absenceSession models.ClassAbsenceSession, id string) (models.ClassAbsenceSession, error) {
+	err := r.db.Model(&models.ClassAbsenceSession{}).Where("id = ?", id).Updates(map[string]interface{}{"start_time": absenceSession.StartTime, "end_time": absenceSession.EndTime, "is_geofence": absenceSession.IsGeofence, "geo_radius": absenceSession.GeoRadius, "latitude": absenceSession.Latitude, "longitude": absenceSession.Longitude}).Error
+	if err != nil {
+		return models.ClassAbsenceSession{}, err
+	}
+
+	err = r.db.First(&absenceSession, "id = ?", id).Error
+
+	return absenceSession, err
+}
+
 func (r *absensiRepository) CreateAbsence(absence []models.Absence) ([]models.Absence, error) {
-	err := r.db.Create(&absence).Error
+	err := r.db.Clauses(clause.OnConflict{
+		Columns:   []clause.Column{{Name: "class_absence_session_id"}, {Name: "student_npm"}},
+		DoUpdates: clause.AssignmentColumns([]string{"latitude", "longitude", "class_date"}),
+	}).Create(&absence).Error
 
 	return absence, err
 
@@ -45,7 +60,7 @@ func (r *absensiRepository) UpdateAbsence(absence models.Absence, npm string, id
 
 func (r *absensiRepository) GetIsOpenAbsenceSessionByClassCodeAndEndTime(classCode string) (models.ClassAbsenceSession, error) {
 	var classAbsence models.ClassAbsenceSession
-	err := r.db.Raw("select * from class_absence_sessions cas where cas.end_time >= now() and cas.class_code = ?", classCode).Scan(&classAbsence).Error
+	err := r.db.Raw("select * from class_absence_sessions cas where cas.end_time >= now() and cas.start_time <= now() and cas.class_code = ?", classCode).Scan(&classAbsence).Error
 	return classAbsence, err
 }
 
@@ -60,7 +75,7 @@ func (r *absensiRepository) GetAbsenceSessionById(id string) (models.ClassAbsenc
 func (r *absensiRepository) GetAbsenceSessionByClassCode(classCode string) ([]models.ClassAbsenceSession, error) {
 	var absenceSession []models.ClassAbsenceSession
 
-	err := r.db.Find(&absenceSession, "class_code = ?", classCode).Error
+	err := r.db.Preload("Absence").Find(&absenceSession, "class_code = ?", classCode).Error
 
 	return absenceSession, err
 
@@ -69,7 +84,7 @@ func (r *absensiRepository) GetAbsenceSessionByClassCode(classCode string) ([]mo
 func (r *absensiRepository) GetAbsenceByClassCodeAndNpm(classCode string, npm string) ([]models.Absence, error) {
 	var absences []models.Absence
 
-	err := r.db.Raw("select a.* from absences a JOIN class_absence_sessions cas ON a.class_absence_session_id = cas.id AND cas.class_code = ? AND a.student_npm = ?", classCode, npm).Order("class_date DESC").Scan(&absences).Error
+	err := r.db.Raw("select a.* from absences a JOIN class_absence_sessions cas ON a.class_absence_session_id = cas.id AND cas.class_code = ? AND a.student_npm = ? ORDER By class_date desc", classCode, npm).Scan(&absences).Error
 
 	return absences, err
 }

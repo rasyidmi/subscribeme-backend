@@ -70,6 +70,8 @@ github.com/TigorLazuardi/tanggal v1.0.0/go.mod h1:7zvkzcADG4AqZ6jr6vngdx0JV2O8+m
 github.com/albrow/jobs v0.4.2 h1:AhhNNgtnOz3h+Grt6uuRJP+uj/AVq+ZhIBY8Mzkf4TM=
 github.com/albrow/jobs v0.4.2/go.mod h1:e4sWh7D1DxPbpxrzJhNo/cMARAljpTYF/osgh2j3+r8=
 github.com/antihax/optional v1.0.0/go.mod h1:uupD/76wgC+ih3iEmQUL+0Ugr19nfwCT1kdvxnR2qWY=
+github.com/appleboy/go-fcm v0.1.5 h1:fKbcZf/7vwGsvDkcop8a+kCHnK+tt4wXX0X7uEzwI6E=
+github.com/appleboy/go-fcm v0.1.5/go.mod h1:MSxZ4LqGRsnywOjnlXJXMqbjZrG4vf+0oHitfC9HRH0=
 github.com/census-instrumentation/opencensus-proto v0.2.1/go.mod h1:f6KPmirojxKA12rnyqOA5BBL4O983OfeGPqjHWSTneU=
 github.com/cespare/xxhash v1.1.0/go.mod h1:XrSqR1VqqWfGrhpAt58auRo0WTKS1nRRg3ghfAqPWnc=
 github.com/cespare/xxhash/v2 v2.1.1/go.mod h1:VGX0DQ3Q6kWi7AoAeZDth3/j3BFtOZR5XLFGgcrjCOs=

@@ -18,6 +18,7 @@ type AbsensiService interface {
 
 	//Dosen
 	CreateAbsenceSession(payload payload.ClassAbsenceSessionPayload, claims *helper.JWTClaim) (*response.ClassAbsenceSessionResponse, error)
+	UpdateAbsenceSession(payload payload.ClassAbsenceSessionPayload, claims *helper.JWTClaim, id string) (*response.ClassAbsenceSessionResponse, error)
 	GetClassDetailByNimDosen(nim string) (*[]response.CourseResponseDosen, error)
 	GetClassParticipantByClassCode(classCode string) (*[]response.ListStudentResponse, error)
 	GetAbsenceSessionByClassCode(classCode string) (*[]response.ClassAbsenceSessionResponse, error)

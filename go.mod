@@ -12,6 +12,7 @@ require (
 )
 
 require (
+	github.com/appleboy/go-fcm v0.1.5 // indirect
 	github.com/dchest/uniuri v1.2.0 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/fatih/structs v1.1.0 // indirect

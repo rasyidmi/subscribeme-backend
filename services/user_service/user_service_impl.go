@@ -25,6 +25,7 @@ func NewUserService(repository user_repository.UserRepository) UserService {
 func (s *userService) CreateUser(claims *helper.JWTClaim, payload payload.FcmPayload) (*response.LoginResponse, error) {
 	user := models.User{
 		Username: claims.Username,
+		Npm:      claims.Npm,
 		Role:     constant.UserRoleMahasiswa,
 		FcmToken: payload.FcmToken,
 	}

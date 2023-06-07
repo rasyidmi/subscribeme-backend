@@ -6,6 +6,7 @@ import (
 
 type AbsensiRepository interface {
 	CreateAbsenceSession(absenceSession models.ClassAbsenceSession) (models.ClassAbsenceSession, error)
+	UpdateAbsenceSession(absenceSession models.ClassAbsenceSession, id string) (models.ClassAbsenceSession, error)
 	CreateAbsence(absence []models.Absence) ([]models.Absence, error)
 	UpdateAbsence(absence models.Absence, npm string, id string) (models.Absence, error)
 

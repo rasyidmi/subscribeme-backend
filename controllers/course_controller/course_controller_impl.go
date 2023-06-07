@@ -149,7 +149,7 @@ func (c *courseController) SetDeadlineReminder(ctx *gin.Context) {
 	data, err := c.service.SetDeadlineReminder(claims, payload)
 	if err != nil {
 		if err.Error() == "400" {
-			response.Error(ctx, "failed", http.StatusBadRequest, errors.New("Oops! An error occurred. The payload time provided is less than the current time."))
+			response.Error(ctx, "failed", http.StatusBadRequest, errors.New("Oops! An error occurred. The payload time provided is less than the current time or the type is wrong."))
 			ctx.Abort()
 			return
 		} else if err.Error() == "409" {

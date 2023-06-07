@@ -14,9 +14,9 @@ type ClassAbsenceSession struct {
 	StartTime   time.Time `gorm:"uniqueIndex:class_session_idx"`
 	EndTime     time.Time
 	IsGeofence  bool
-	GeoRadius   float64
-	Latitude    float64   `gorm:"default:null"`
-	Longitude   float64   `gorm:"default:null"`
+	GeoRadius   *float64  `gorm:"default:null"`
+	Latitude    *float64  `gorm:"default:null"`
+	Longitude   *float64  `gorm:"default:null"`
 	Absence     []Absence `gorm:"foreignKey:ClassAbsenceSessionID"`
 }
 

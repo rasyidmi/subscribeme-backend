@@ -85,8 +85,6 @@ func (s *courseService) SubscribeCourse(claims *helper.JWTClaim, payload payload
 		return nil, err
 	}
 
-	
-
 	if len(assignment.Courses[0].Assignments) != 0 {
 		for _, v := range assignment.Courses[0].Assignments {
 			event := models.ClassEvent{
@@ -112,14 +110,13 @@ func (s *courseService) SubscribeCourse(claims *helper.JWTClaim, payload payload
 		return nil, err
 	}
 
-
 	if len(quiz.CourseQuizzez) != 0 {
 		for _, v := range quiz.CourseQuizzez {
 			event := models.ClassEvent{
-				CourseSceleID: course.ID.String(),
-				Type:          constant.QuizType,
-				Date:          time.Unix(v.TimeOpen, 0),
-				EventName:     v.Name,
+				CourseSceleID:  course.ID.String(),
+				Type:           constant.QuizType,
+				Date:           time.Unix(v.TimeOpen, 0),
+				EventName:      v.Name,
 				CourseModuleID: v.ID,
 			}
 
@@ -269,7 +266,13 @@ func (s *courseService) SetDeadlineReminder(claims *helper.JWTClaim, payload pay
 		return false, err
 	}
 
-	helper.SchedulerEvent.Schedule("ReminderEventSetDeadline", string(jsonBytes), payload.SetTime, user.ID.String(), event.ID.String())
+	if payload.Type == constant.AssignmentType {
+		helper.SchedulerEvent.Schedule("ReminderAssignmentSetDeadline", string(jsonBytes), payload.SetTime, user.ID.String(), event.ID.String())
+	} else if payload.Type == constant.QuizType {
+		helper.SchedulerEvent.Schedule("ReminderQuizSetDeadline", string(jsonBytes), payload.SetTime, user.ID.String(), event.ID.String())
+	} else {
+		return false, errors.New("400")
+	}
 
 	return true, nil
 

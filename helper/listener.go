@@ -28,7 +28,100 @@ func ReminderClassWillStarted(data map[string]interface{}) error {
 
 }
 
-func ReminderEventSetDeadline(data string, eventId uint, db *gorm.DB) error {
+func ReminderAbsenceWillOver(data string, eventId uint, db *gorm.DB) error {
+	var classAbsence models.ClassAbsenceSession
+
+	err := json.Unmarshal([]byte(data), &classAbsence)
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	//Get job
+	var job models.Job
+	err = db.Preload("User").First(&job, eventId).Error
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
+	var dataMap = map[string]interface{}{}
+
+	dataMap["code"] = classAbsence.ClassCode
+
+	classDetail, err := GetSiakngData[models.ClassDetail](constant.GetClassByCode, dataMap)
+	if err != nil {
+		log.Println(string("\033[31m"), err.Error())
+		return err
+	}
+
+	sendData := make(map[string]string)
+
+	sendData["title"] = fmt.Sprintf("Cepat lakukan absensu pada kelas %s", classDetail.ClassName)
+	sendData["body"] = fmt.Sprintf("Absensi kelas %s akan ditutup pada %s", classDetail.ClassName, classAbsence.EndTime.Format("2 January 2006 - 15:04"))
+
+	err = SendPushNotification(sendData)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
+	err = db.Delete(&models.Job{}, eventId).Error
+	if err != nil {
+		log.Print("💀 error: ", err)
+	}
+
+	return nil
+}
+
+func ReminderAbsenceCanBeDone(data string, eventId uint, db *gorm.DB) error {
+	var classAbsence models.ClassAbsenceSession
+
+	err := json.Unmarshal([]byte(data), &classAbsence)
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	//Get job
+	var job models.Job
+	err = db.Preload("User").First(&job, eventId).Error
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
+	var dataMap = map[string]interface{}{}
+
+	dataMap["code"] = classAbsence.ClassCode
+
+	classDetail, err := GetSiakngData[models.ClassDetail](constant.GetClassByCode, dataMap)
+	if err != nil {
+		log.Println(string("\033[31m"), err.Error())
+		return err
+	}
+
+	sendData := make(map[string]string)
+
+	sendData["title"] = fmt.Sprintf("Absensi kelas %s sudah dibuka", classDetail.ClassName)
+	sendData["body"] = fmt.Sprintf("Absensi kelas %s akan ditutup pada %s", classDetail.ClassName, classAbsence.EndTime.Format("2 January 2006 - 15:04"))
+
+	err = SendPushNotification(sendData)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
+	err = db.Delete(&models.Job{}, eventId).Error
+	if err != nil {
+		log.Print("💀 error: ", err)
+	}
+
+	return nil
+
+}
+
+func ReminderAssignmentSetDeadline(data string, eventId uint, db *gorm.DB) error {
 	var classEvent models.ClassEvent
 
 	err := json.Unmarshal([]byte(data), &classEvent)
@@ -67,6 +160,61 @@ func ReminderEventSetDeadline(data string, eventId uint, db *gorm.DB) error {
 
 	sendData["title"] = message
 	sendData["body"] = fmt.Sprintf("Tugas %s akan berakhir pada %s", classEvent.EventName, classEvent.Date.Format("2 January 2006 - 15:04"))
+	sendData["token"] = job.User.FcmToken
+
+	err = SendPushNotification(sendData)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
+	err = db.Delete(&models.Job{}, eventId).Error
+	if err != nil {
+		log.Print("💀 error: ", err)
+	}
+
+	return nil
+}
+
+func ReminderQuizSetDeadline(data string, eventId uint, db *gorm.DB) error {
+	var classEvent models.ClassEvent
+
+	err := json.Unmarshal([]byte(data), &classEvent)
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	//Get job
+	var job models.Job
+	err = db.Preload("User").First(&job, eventId).Error
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
+	diff := classEvent.Date.Sub(job.RunAt)
+
+	sendData := make(map[string]string)
+
+	days := int(diff.Hours() / 24)
+	hours := int(diff.Hours()) % 24
+	minutes := int(diff.Minutes()) % 60
+
+	message := "Kuis akan dimulai "
+	if days > 0 {
+		message += fmt.Sprintf(" %d hari", days)
+	}
+	if hours > 0 {
+		message += fmt.Sprintf(" %d jam", hours)
+	}
+	if minutes > 0 {
+		message += fmt.Sprintf(" %d menit", minutes)
+	}
+	message += " lagi"
+
+	sendData["title"] = message
+	sendData["body"] = fmt.Sprintf("Kuis %s akan dimulai pada %s", classEvent.EventName, classEvent.Date.Format("2 January 2006 - 15:04"))
 	sendData["token"] = job.User.FcmToken
 
 	err = SendPushNotification(sendData)

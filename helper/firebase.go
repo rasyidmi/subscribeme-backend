@@ -1,51 +1,77 @@
 package helper
 
 import (
-	"context"
-
 	firebase "firebase.google.com/go"
-	"firebase.google.com/go/messaging"
+	"github.com/appleboy/go-fcm"
 
 	"log"
-
-	"google.golang.org/api/option"
 )
 
 var App *firebase.App
 
-func InitFirebase() {
-	opt := option.WithCredentialsFile("./serviceAccountKey.json")
-	app, err := firebase.NewApp(context.Background(), nil, opt)
-	if err != nil {
-		log.Println("error initializing app: ", err)
+// func InitFirebase() {
+// 	opt := option.WithCredentialsFile("./serviceAccountKey.json")
+// 	app, err := firebase.NewApp(context.Background(), nil, opt)
+// 	if err != nil {
+// 		log.Println("error initializing app: ", err)
 
-	}
+// 	}
 
-	App = app
-}
+// 	App = app
+// }
+
+// func SendPushNotification(data map[string]string) error {
+
+// 	fcmCLient, err := App.Messaging(context.Background())
+// 	if err != nil {
+// 		log.Println("error initializing app: ", err)
+// 		return nil
+// 	}
+
+// 	messaging := &messaging.Message{
+// 		Notification: &messaging.Notification{
+// 			Title: data["title"],
+// 			Body:  data["body"],
+// 		},
+// 		Token: data["token"],
+// 	}
+
+// 	fcmCLient.Send(context.Background(), messaging)
+
+// 	if err != nil {
+// 		return err
+// 	}
+
+// 	return nil
+
+// }
 
 func SendPushNotification(data map[string]string) error {
-
-	fcmCLient, err := App.Messaging(context.Background())
-	if err != nil {
-		log.Println("error initializing app: ", err)
-		return nil
-	}
-
-	messaging := &messaging.Message{
-		Notification: &messaging.Notification{
+	msg := &fcm.Message{
+		To: data["token"],
+		Notification: &fcm.Notification{
 			Title: data["title"],
 			Body:  data["body"],
 		},
-		Token: data["token"],
 	}
 
-	fcmCLient.Send(context.Background(), messaging)
-
+	// Create a FCM client to send the message.
+	client, err := fcm.NewClient("AAAAk61QKQU:APA91bHT9wIxx12PTIJ0AVw2kaliPeJl2IJG0EwNgu5N0vFT3OT9t5i6rnUDkM2RaLhhv0v5x4DXemISitWviY5TA2e6R_4pqgVChKIFeU6CRA-hNMfllFJaeI9MS4eviFYhUbOVDEHP")
 	if err != nil {
+		log.Println(err)
 		return err
 	}
 
-	return nil
+	log.Println(client)
 
+	// Send the message and receive the response without retries.
+	resp, err := client.Send(msg)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
+	log.Println(resp)
+
+	return nil
 }

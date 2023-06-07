@@ -11,7 +11,7 @@ import (
 	"projects-subscribeme-backend/models"
 )
 
-func GetSiakngData[T models.ClassSchedule | []models.ClassSchedule | []models.ClassDetail](api constant.SiakNGEnum, data map[string]interface{}) (*T, error) {
+func GetSiakngData[T models.ClassSchedule | []models.ClassSchedule | []models.ClassDetail | models.ClassDetail](api constant.SiakNGEnum, data map[string]interface{}) (*T, error) {
 	siakng := config.LoadSiakNGConfig()
 
 	client := &http.Client{}
@@ -32,6 +32,12 @@ func GetSiakngData[T models.ClassSchedule | []models.ClassSchedule | []models.Cl
 		req = reqs
 	} else if api == constant.GetClassDetailByNimDosen {
 		reqs, err := http.NewRequest("GET", fmt.Sprintf(constant.GetClassDetailByNimDosen.String(), data["nim"], data["tahun"], data["term"]), nil)
+		if err != nil {
+			return nil, err
+		}
+		req = reqs
+	} else if api == constant.GetClassByCode {
+		reqs, err := http.NewRequest("GET", fmt.Sprintf(constant.GetClassByCode.String(), data["code"]), nil)
 		if err != nil {
 			return nil, err
 		}

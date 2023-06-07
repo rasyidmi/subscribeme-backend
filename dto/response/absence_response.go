@@ -1,12 +1,9 @@
 package response
 
 import (
-	"fmt"
-	"log"
 	"projects-subscribeme-backend/models"
 	"time"
 
-	"github.com/TigorLazuardi/tanggal"
 	"github.com/jinzhu/copier"
 )
 
@@ -34,11 +31,11 @@ type AbsenceResponse struct {
 	Longitude             float64   `json:"longitude"`
 	DeviceCode            string    `json:"device_code"`
 	PresentTime           time.Time `json:"present_time"`
-	ClassDate             string    `json:"class_absence_open_time"`
+	ClassDate             time.Time `json:"class_absence_open_time"`
 	Present               bool      `json:"present"`
 }
 
-func NewClassAbsenceSessionResponse(model models.ClassAbsenceSession, isPreload bool) *ClassAbsenceSessionResponse {
+func NewClassAbsenceSessionResponse(model models.ClassAbsenceSession, isPreload bool, withoutAbsenceResponse bool) *ClassAbsenceSessionResponse {
 	response := &ClassAbsenceSessionResponse{
 		ID:          model.ID.String(),
 		TeacherName: model.TeacherName,
@@ -49,18 +46,23 @@ func NewClassAbsenceSessionResponse(model models.ClassAbsenceSession, isPreload 
 
 	if model.IsGeofence {
 		response.IsGeofence = true
-		response.GeoRadius = model.GeoRadius
-		response.Latitude = model.Latitude
-		response.Longitude = model.Longitude
+		response.GeoRadius = *model.GeoRadius
+		response.Latitude = *model.Latitude
+		response.Longitude = *model.Longitude
 	}
 
-	if isPreload {
+	if isPreload && withoutAbsenceResponse {
 		response.AbsenceResponse = *NewAbsenceResponses(model.Absence)
 		total, present, absence := countStudentPresent(model.Absence)
 		response.TotalStudentClass = total
 		response.TotalPresentStudentClass = present
 		response.TotalAbsenceStudentClass = absence
 
+	} else if isPreload && !withoutAbsenceResponse {
+		total, present, absence := countStudentPresent(model.Absence)
+		response.TotalStudentClass = total
+		response.TotalPresentStudentClass = present
+		response.TotalAbsenceStudentClass = absence
 	}
 
 	return response
@@ -80,11 +82,11 @@ func countStudentPresent(model []models.Absence) (total float64, present float64
 	return total, present, absence
 }
 
-func NewClassAbsenceSessionResponses(model []models.ClassAbsenceSession, isPreload bool) *[]ClassAbsenceSessionResponse {
+func NewClassAbsenceSessionResponses(model []models.ClassAbsenceSession, isPreload bool, withoutAbsenceResponse bool) *[]ClassAbsenceSessionResponse {
 	var responses []ClassAbsenceSessionResponse
 
 	for _, v := range model {
-		response := NewClassAbsenceSessionResponse(v, isPreload)
+		response := NewClassAbsenceSessionResponse(v, isPreload, withoutAbsenceResponse)
 		responses = append(responses, *response)
 
 	}
@@ -95,11 +97,6 @@ func NewClassAbsenceSessionResponses(model []models.ClassAbsenceSession, isPrelo
 func NewAbsenceResponse(model models.Absence) *AbsenceResponse {
 	var response AbsenceResponse
 	copier.Copy(&response, model)
-	tgl, err := tanggal.Papar(model.ClassDate, "Jakarta", tanggal.WIB)
-	if err != nil {
-		log.Fatal(err)
-	}
-	response.ClassDate = fmt.Sprintf("%s, %d %s %d", tgl.NamaHari, tgl.Hari, tgl.NamaBulan, tgl.Tahun)
 
 	return &response
 

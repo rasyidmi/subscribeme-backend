@@ -6,6 +6,7 @@ import (
 
 type AbsensiController interface {
 	CreateAbsenceSession(ctx *gin.Context)
+	UpdateAbsenceSession(ctx *gin.Context)
 	UpdateAbsence(ctx *gin.Context)
 	CheckAbsenceIsOpen(ctx *gin.Context)
 	GetAbsenceByClassCodeAndNpm(ctx *gin.Context)

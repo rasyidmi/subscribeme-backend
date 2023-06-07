@@ -36,6 +36,7 @@ func RouterSetup() *gin.Engine {
 	absence.GET("/check/:class_code", middlewares.Auth("Mahasiswa"), initializers.AbsensiController.CheckAbsenceIsOpen)
 	absence.GET("/:class_code", middlewares.Auth("Mahasiswa"), initializers.AbsensiController.GetAbsenceByClassCodeAndNpm)
 	absence.POST("/session", middlewares.Auth("Dosen"), initializers.AbsensiController.CreateAbsenceSession)
+	absence.PUT("/session/:absence_session_id", middlewares.Auth("Dosen"), initializers.AbsensiController.UpdateAbsenceSession)
 	absence.GET("/session-id/:absence_session_id", middlewares.Auth("Dosen"), initializers.AbsensiController.GetAbsenceSessionDetailByAbsenceSessionId)
 	absence.GET("/session/:class_code", middlewares.Auth("Dosen"), initializers.AbsensiController.GetAbsenceSessionByClassCode)
 

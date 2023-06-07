@@ -88,7 +88,7 @@ func (r *courseRepository) GetDeadlineTodayByUserId(userId string) ([]models.Use
 	currentDate := time.Now().Format("2006-01-02")
 
 	err := r.db.Preload("ClassEvent").Joins("JOIN class_events ce ON ce.id = user_events.event_id").
-		Where("user_id = ?", userId).Where("DATE(ce.date) = ?", currentDate).Order("ce.date DESC").Find(&userEvents).Error
+		Where("user_id = ?", userId).Where("DATE(ce.date) = ?", currentDate).Order("ce.date ASC").Find(&userEvents).Error
 
 	return userEvents, err
 }
@@ -100,7 +100,7 @@ func (r *courseRepository) GetDeadline7DaysAheadByUserId(userId string) ([]model
 	next7Days := currentDate.AddDate(0, 0, 7)
 
 	err := r.db.Preload("ClassEvent").Joins("JOIN class_events ce ON ce.id = user_events.event_id").
-		Where("user_id = ?", userId).Where("DATE(ce.date) BETWEEN ? AND ?", currentDate, next7Days).Order("ce.date DESC").Find(&userEvents).Error
+		Where("user_id = ?", userId).Where("DATE(ce.date) BETWEEN ? AND ?", currentDate, next7Days).Order("ce.date ASC").Find(&userEvents).Error
 
 	return userEvents, err
 
