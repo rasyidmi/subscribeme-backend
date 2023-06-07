@@ -13,7 +13,6 @@ import (
 	"projects-subscribeme-backend/repositories/user_repository"
 	"time"
 
-	"github.com/fatih/structs"
 	"github.com/google/uuid"
 	"github.com/jftuga/geodist"
 	"gorm.io/gorm"
@@ -131,11 +130,21 @@ func (s *absensiService) createAbsence(payload models.ClassAbsenceSession, absen
 
 		user, err := s.userRepository.GetUserByNpm(val.Student[0].Npm)
 		if err == nil {
+			loc, err := time.LoadLocation("Asia/Jakarta")
+			if err != nil {
+				log.Println(string("\033[31m"), err.Error())
+				return false, err
+			}
+
+			payload.StartTime = payload.StartTime.In(loc)
+			payload.EndTime = payload.EndTime.In(loc)
+
 			jsonBytes, err := json.Marshal(payload)
 			if err != nil {
 				log.Println(string("\033[31m"), err.Error())
 				return false, err
 			}
+
 			endTime := payload.EndTime.Add(-time.Minute * 5)
 			helper.SchedulerEvent.Schedule("ReminderAbsenceCanBeDone", string(jsonBytes), payload.StartTime, user.ID.String(), "")
 			helper.SchedulerEvent.Schedule("ReminderAbsenceWillOver", string(jsonBytes), endTime, user.ID.String(), "")
@@ -283,12 +292,6 @@ func (s *absensiService) GetClassDetailByNpmMahasiswa(npm string) (*[]response.C
 		log.Println(string("\033[31m"), err.Error())
 		return nil, err
 	}
-
-	classDetail := *models
-
-	m := structs.Map(classDetail[0])
-
-	helper.ReminderClassWillStarted(m)
 
 	return response.NewClassDetailResponses(*models), nil
 }

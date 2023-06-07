@@ -68,3 +68,24 @@ func GetSiakngData[T models.ClassSchedule | []models.ClassSchedule | []models.Cl
 	return &responseObject, nil
 
 }
+
+func ConvertToWeekday(dayStr string) string {
+	switch dayStr {
+	case "Senin":
+		return "Monday"
+	case "Selasa":
+		return "Tuesday"
+	case "Rabu":
+		return "Rabu"
+	case "Kamis":
+		return "Thursday"
+	case "Jumat":
+		return "Friday"
+	case "Sabtu":
+		return "Saturday"
+	case "Minggu":
+		return "Sunday"
+	default:
+		return "Error"
+	}
+}

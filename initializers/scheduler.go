@@ -8,6 +8,7 @@ import (
 
 var eventListeners = helper.Listeners{
 	"ReminderAssignmentSetDeadline":  helper.ReminderAssignmentSetDeadline,
+	"ReminderQuizSetDeadline":        helper.ReminderQuizSetDeadline,
 	"UpdateAllAssignmentAndQuizData": helper.UpdateAllAssignmentAndQuizData,
 	"ReminderAbsenceCanBeDone":       helper.ReminderAbsenceCanBeDone,
 	"ReminderAbsenceWillOver":        helper.ReminderAbsenceWillOver,

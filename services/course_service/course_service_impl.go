@@ -146,6 +146,37 @@ func (s *courseService) SubscribeCourse(claims *helper.JWTClaim, payload payload
 		if err != nil {
 			log.Println(string("\033[31m"), err.Error())
 		}
+
+		//Cek Tugas lebih dari 1 hari
+		diff := v.Date.Sub(time.Now())
+		days := int(diff.Hours() / 24)
+		hours := int(diff.Hours()) % 24
+
+		loc, err := time.LoadLocation("Asia/Jakarta")
+		if err != nil {
+			log.Println(string("\033[31m"), err.Error())
+			return nil, err
+		}
+
+		v.Date = v.Date.In(loc)
+
+		jsonBytes, err := json.Marshal(v)
+		if err != nil {
+			log.Println(string("\033[31m"), err.Error())
+			return nil, err
+		}
+
+		if days >= 1 {
+			oneDayBeforeDeadline := v.Date.Add(-time.Hour * 24)
+			helper.SchedulerEvent.Schedule("ReminderAssignmentSetDeadline", string(jsonBytes), oneDayBeforeDeadline, user.ID.String(), v.ID.String())
+			helper.SchedulerEvent.Schedule("ReminderQuizSetDeadline", string(jsonBytes), oneDayBeforeDeadline, user.ID.String(), v.ID.String())
+		}
+
+		if hours >= 1 {
+			oneHourBeforeDeadline := v.Date.Add(-time.Hour * 1)
+			helper.SchedulerEvent.Schedule("ReminderAssignmentSetDeadline", string(jsonBytes), oneHourBeforeDeadline, user.ID.String(), v.ID.String())
+			helper.SchedulerEvent.Schedule("ReminderQuizSetDeadline", string(jsonBytes), oneHourBeforeDeadline, user.ID.String(), v.ID.String())
+		}
 	}
 
 	return response.NewCourseSceleResponse(course), nil
@@ -259,6 +290,14 @@ func (s *courseService) SetDeadlineReminder(claims *helper.JWTClaim, payload pay
 		log.Println(string("\033[31m"), err.Error())
 		return false, err
 	}
+
+	loc, err := time.LoadLocation("Asia/Jakarta")
+	if err != nil {
+		log.Println(string("\033[31m"), err.Error())
+		return false, err
+	}
+
+	event.Date = event.Date.In(loc)
 
 	jsonBytes, err := json.Marshal(event)
 	if err != nil {

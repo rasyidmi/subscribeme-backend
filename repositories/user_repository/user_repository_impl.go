@@ -36,7 +36,7 @@ func (r *userRepository) GetUserByNpm(npm string) (models.User, error) {
 }
 
 func (r *userRepository) UpdateFcmTokenUser(username string, fcmToken string) (models.User, error) {
-	err := r.db.Model(&models.User{}).Where("username = ?", username).Update("name", fcmToken).Error
+	err := r.db.Model(&models.User{}).Where("username = ?", username).Update("fcm_token", fcmToken).Error
 	if err != nil {
 		return models.User{}, err
 	}

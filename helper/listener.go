@@ -6,23 +6,37 @@ import (
 	"log"
 	"projects-subscribeme-backend/constant"
 	"projects-subscribeme-backend/models"
+	"strings"
 	"time"
 
-	"github.com/mitchellh/mapstructure"
 	"golang.org/x/exp/slices"
 	"gorm.io/gorm"
 )
 
-func ReminderClassWillStarted(data map[string]interface{}) error {
+func ReminderClassWillStarted(data string, eventId uint, db *gorm.DB) error {
 	// Convert the map to JSON
 	var classSchedule models.ClassSchedule
 
-	mapstructure.Decode(data, &classSchedule)
+	err := json.Unmarshal([]byte(data), &classSchedule)
 
-	sendData := make(map[string]interface{})
+	if err != nil {
+		fmt.Println(err)
+	}
 
-	sendData["title"] = "Dalam 15 Menit Kelas Akan Dimulai"
-	sendData["body"] = fmt.Sprintf("Kelas %s akan dimulai pada jam %s", classSchedule.ClassDetail.ClassName, classSchedule.StartTime)
+	timeString := classSchedule.StartTime
+	parts := strings.Split(timeString, ":")
+	hourMinute := parts[0] + ":" + parts[1]
+
+	sendData := make(map[string]string)
+
+	sendData["title"] = "Dalam 30 Menit Kelas Akan Dimulai"
+	sendData["body"] = fmt.Sprintf("Kelas %s akan dimulai pada jam %s", classSchedule.ClassDetail.ClassName, hourMinute)
+
+	err = SendPushNotification(sendData)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
 
 	return nil
 
@@ -57,8 +71,9 @@ func ReminderAbsenceWillOver(data string, eventId uint, db *gorm.DB) error {
 
 	sendData := make(map[string]string)
 
-	sendData["title"] = fmt.Sprintf("Cepat lakukan absensu pada kelas %s", classDetail.ClassName)
-	sendData["body"] = fmt.Sprintf("Absensi kelas %s akan ditutup pada %s", classDetail.ClassName, classAbsence.EndTime.Format("2 January 2006 - 15:04"))
+	sendData["token"] = job.User.FcmToken
+	sendData["title"] = fmt.Sprintf("Cepat lakukan absensi pada kelas %s", classDetail.ClassName)
+	sendData["body"] = fmt.Sprintf("Absensi kelas %s akan ditutup pada %s", classDetail.ClassName, classAbsence.EndTime.Format("15:04"))
 
 	err = SendPushNotification(sendData)
 	if err != nil {
@@ -101,10 +116,15 @@ func ReminderAbsenceCanBeDone(data string, eventId uint, db *gorm.DB) error {
 		return err
 	}
 
+	diff := classAbsence.StartTime.Sub(classAbsence.EndTime)
+	minutes := int(diff.Minutes()) % 60
+
 	sendData := make(map[string]string)
 
+	sendData["token"] = job.User.FcmToken
+
 	sendData["title"] = fmt.Sprintf("Absensi kelas %s sudah dibuka", classDetail.ClassName)
-	sendData["body"] = fmt.Sprintf("Absensi kelas %s akan ditutup pada %s", classDetail.ClassName, classAbsence.EndTime.Format("2 January 2006 - 15:04"))
+	sendData["body"] = fmt.Sprintf("Absensi kelas %s akan berlangsung selama %d menit", classDetail.ClassName, minutes)
 
 	err = SendPushNotification(sendData)
 	if err != nil {
@@ -159,7 +179,7 @@ func ReminderAssignmentSetDeadline(data string, eventId uint, db *gorm.DB) error
 	message += " lagi"
 
 	sendData["title"] = message
-	sendData["body"] = fmt.Sprintf("Tugas %s akan berakhir pada %s", classEvent.EventName, classEvent.Date.Format("2 January 2006 - 15:04"))
+	sendData["body"] = fmt.Sprintf("Tugas %s akan berakhir pada %s", classEvent.EventName, classEvent.Date.Format("15:04"))
 	sendData["token"] = job.User.FcmToken
 
 	err = SendPushNotification(sendData)
@@ -174,6 +194,62 @@ func ReminderAssignmentSetDeadline(data string, eventId uint, db *gorm.DB) error
 	}
 
 	return nil
+}
+
+func ReminderQuiztWillBeOver(data string, eventId uint, db *gorm.DB) error {
+	var classEvent models.ClassEvent
+
+	err := json.Unmarshal([]byte(data), &classEvent)
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	//Get job
+	var job models.Job
+	err = db.Preload("User").First(&job, eventId).Error
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
+	diff := classEvent.Date.Sub(job.RunAt)
+
+	sendData := make(map[string]string)
+
+	days := int(diff.Hours() / 24)
+	hours := int(diff.Hours()) % 24
+	minutes := int(diff.Minutes()) % 60
+
+	message := "Kuis akan dimulai "
+	if days > 0 {
+		message += fmt.Sprintf(" %d hari", days)
+	}
+	if hours > 0 {
+		message += fmt.Sprintf(" %d jam", hours)
+	}
+	if minutes > 0 {
+		message += fmt.Sprintf(" %d menit", minutes)
+	}
+	message += " lagi"
+
+	sendData["title"] = message
+	sendData["body"] = fmt.Sprintf("Kuis %s akan dimulai pada %s", classEvent.EventName, classEvent.Date.Format("15:04"))
+	sendData["token"] = job.User.FcmToken
+
+	err = SendPushNotification(sendData)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
+	err = db.Delete(&models.Job{}, eventId).Error
+	if err != nil {
+		log.Print("💀 error: ", err)
+	}
+
+	return nil
+
 }
 
 func ReminderQuizSetDeadline(data string, eventId uint, db *gorm.DB) error {
@@ -214,7 +290,7 @@ func ReminderQuizSetDeadline(data string, eventId uint, db *gorm.DB) error {
 	message += " lagi"
 
 	sendData["title"] = message
-	sendData["body"] = fmt.Sprintf("Kuis %s akan dimulai pada %s", classEvent.EventName, classEvent.Date.Format("2 January 2006 - 15:04"))
+	sendData["body"] = fmt.Sprintf("Kuis %s akan dimulai pada %s", classEvent.EventName, classEvent.Date.Format("15:04"))
 	sendData["token"] = job.User.FcmToken
 
 	err = SendPushNotification(sendData)
@@ -288,7 +364,6 @@ func UpdateAllAssignmentAndQuizData(data string, eventId uint, db *gorm.DB) erro
 						log.Println(string("\033[31m"), err.Error())
 						return err
 					}
-					break
 				} else {
 					newClassEvent := models.ClassEvent{
 						Date:           time.Unix(am.DueDate, 0),
@@ -316,6 +391,29 @@ func UpdateAllAssignmentAndQuizData(data string, eventId uint, db *gorm.DB) erro
 						if err != nil {
 							log.Println(string("\033[31m"), err.Error())
 							return err
+						}
+
+						//Cek Tugas lebih dari 1 hari
+						diff := newClassEvent.Date.Sub(time.Now())
+						days := int(diff.Hours() / 24)
+						hours := int(diff.Hours()) % 24
+
+						jsonBytes, err := json.Marshal(newClassEvent)
+						if err != nil {
+							log.Println(string("\033[31m"), err.Error())
+							return err
+						}
+
+						if days >= 1 {
+							oneDayBeforeDeadline := newClassEvent.Date.Add(-time.Hour * 24)
+							SchedulerEvent.Schedule("ReminderAssignmentSetDeadline", string(jsonBytes), oneDayBeforeDeadline, user.ID.String(), newClassEvent.ID.String())
+
+						}
+
+						if hours >= 1 {
+							oneHourBeforeDeadline := newClassEvent.Date.Add(-time.Hour * 1)
+							SchedulerEvent.Schedule("ReminderAssignmentSetDeadline", string(jsonBytes), oneHourBeforeDeadline, user.ID.String(), newClassEvent.ID.String())
+
 						}
 					}
 				}
@@ -374,6 +472,29 @@ func UpdateAllAssignmentAndQuizData(data string, eventId uint, db *gorm.DB) erro
 						if err != nil {
 							log.Println(string("\033[31m"), err.Error())
 							return err
+						}
+
+						//Cek Tugas lebih dari 1 hari
+						diff := newClassEvent.Date.Sub(time.Now())
+						days := int(diff.Hours() / 24)
+						hours := int(diff.Hours()) % 24
+
+						jsonBytes, err := json.Marshal(newClassEvent)
+						if err != nil {
+							log.Println(string("\033[31m"), err.Error())
+							return err
+						}
+
+						if days >= 1 {
+							oneDayBeforeDeadline := newClassEvent.Date.Add(-time.Hour * 24)
+							SchedulerEvent.Schedule("ReminderQuizSetDeadline", string(jsonBytes), oneDayBeforeDeadline, user.ID.String(), newClassEvent.ID.String())
+
+						}
+
+						if hours >= 1 {
+							oneHourBeforeDeadline := newClassEvent.Date.Add(-time.Hour * 1)
+							SchedulerEvent.Schedule("ReminderQuizSetDeadline", string(jsonBytes), oneHourBeforeDeadline, user.ID.String(), newClassEvent.ID.String())
+
 						}
 					}
 				}
