@@ -40,7 +40,7 @@ func (s *absensiService) CreateAbsenceSession(payload payload.ClassAbsenceSessio
 
 	if !classSessionCheck {
 		log.Println(string("\033[31m"), errors.New("403"))
-		return nil, err
+		return nil, errors.New("403")
 	}
 
 	model := models.ClassAbsenceSession{

@@ -73,7 +73,6 @@ func (s Scheduler) CheckEventsInInterval(ctx context.Context, duration time.Dura
 				ticker.Stop()
 				return
 			case <-ticker.C:
-				log.Println("⏰ Ticks Received...")
 				events := s.checkDueEvents()
 				for _, e := range events {
 					s.callListeners(e)
@@ -97,7 +96,6 @@ func (s Scheduler) checkDueEvents() []Event {
 	for rows.Next() {
 		evt := Event{}
 		rows.Scan(&evt.ID, &evt.Name, &evt.Payload)
-		log.Println(evt)
 		events = append(events, evt)
 	}
 	return events

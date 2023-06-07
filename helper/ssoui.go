@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"projects-subscribeme-backend/models"
+	"strings"
 
 	"github.com/jinzhu/copier"
 	ssojwt "github.com/ristekoss/golang-sso-ui-jwt"
@@ -39,6 +40,8 @@ func ValidateSSOTicket(ticket string, serviceUrl string) (*models.ServiceRespons
 	}
 
 	copier.Copy(&response.AuthenticationSuccess.Attributes.Jurusan, jurusan)
+
+	response.AuthenticationSuccess.User = strings.ToLower(response.AuthenticationSuccess.User)
 
 	return &response, nil
 }

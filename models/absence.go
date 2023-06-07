@@ -21,9 +21,9 @@ type ClassAbsenceSession struct {
 }
 
 type Absence struct {
-	ClassAbsenceSessionID string
+	ClassAbsenceSessionID string `gorm:"uniqueIndex:class_session_id"`
 	StudentName           string
-	StudentNpm            string  `gorm:"unique"`
+	StudentNpm            string  `gorm:"uniqueIndex:class_session_id"`
 	Latitude              float64 `gorm:"default:null"`
 	Longitude             float64 `gorm:"default:null"`
 	DeviceCode            string

@@ -48,7 +48,7 @@ func Setup() {
 	initController()
 	helper.InitFirebase()
 	SetupScheduler()
-	
+
 }
 
 func initRepositories() {
