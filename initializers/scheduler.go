@@ -24,8 +24,6 @@ func SetupScheduler() {
 	scheduler.StartCron()
 
 	scheduler.CheckEventsInInterval(context.Background(), 5*time.Second)
-	// scheduler.Schedule("UpdateAllAssignmentAndQuizData", "", time.Now().Add(5*time.Second), "", "")
-	// scheduler.ScheduleCron("UpdateAllAssignmentAndQuizData", "", "* * * * *", "", "", time.Now().Add(30*time.Second))
-	// scheduler.ScheduleCron("UpdateAllAssignmentAndQuizData", "", "45 1 * * *", "", "")
+	// scheduler.ScheduleCron("UpdateAllAssignmentAndQuizData", "", "0 2 * * *", "", "")
 
 }

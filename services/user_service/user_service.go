@@ -4,6 +4,7 @@ import (
 	"projects-subscribeme-backend/dto/payload"
 	"projects-subscribeme-backend/dto/response"
 	"projects-subscribeme-backend/helper"
+	"projects-subscribeme-backend/models"
 )
 
 type UserService interface {
@@ -11,4 +12,5 @@ type UserService interface {
 	Login(payload payload.SSOPayload) (*response.LoginResponse, error)
 	CreateUser(claims *helper.JWTClaim, payload payload.FcmPayload) (*response.LoginResponse, error)
 	UpdateFcmTokenUser(claims *helper.JWTClaim, payload payload.FcmPayload) (*response.UserResponse, error)
+	setClassReminder(user models.User) (bool, error)
 }

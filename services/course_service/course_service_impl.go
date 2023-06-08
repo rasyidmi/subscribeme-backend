@@ -134,7 +134,7 @@ func (s *courseService) SubscribeCourse(claims *helper.JWTClaim, payload payload
 				}
 				event.Date = time.Unix(v.TimeClose, 0).In(loc)
 
-				jsonBytes, err := json.Marshal(v)
+				jsonBytes, err := json.Marshal(event)
 				if err != nil {
 					log.Println(string("\033[31m"), err.Error())
 					return nil, err

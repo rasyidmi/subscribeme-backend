@@ -125,34 +125,26 @@ func (s Scheduler) Schedule(event string, payload string, runAt time.Time, userI
 // ScheduleCron schedules a cron job
 func (s Scheduler) ScheduleCron(event string, payload string, cron string, userId string, eventId string) {
 	log.Print("🚀 Scheduling event ", event, " with cron string ", cron)
-	entryID, ok := s.cronEntries[event]
+
 	var jobs models.Job
-	if ok {
-		s.cron.Remove(entryID)
-		err := s.db.Model(&jobs).Where("name = ? AND run_at >= ? AND cron IS NOT NULL", time.Now(), event).Updates(&models.Job{Cron: &cron, Payload: payload}).Error
-		if err != nil {
-			log.Print("schedule cron update error: ", err)
-		}
-	} else {
-		job := &models.Job{
-			Name:    event,
-			Payload: payload,
-			RunAt:   time.Now(),
-			Cron:    &cron,
-			UserID:  userId,
-		}
-
-		if eventId != "" {
-			job.EventID = eventId
-		}
-
-		err := s.db.Create(&job).Error
-		if err != nil {
-			log.Print("schedule cron insert error: ", err)
-		}
-
-		jobs = *job
+	job := &models.Job{
+		Name:    event,
+		Payload: payload,
+		RunAt:   time.Now(),
+		Cron:    &cron,
+		UserID:  userId,
 	}
+
+	if eventId != "" {
+		job.EventID = eventId
+	}
+
+	err := s.db.Create(&job).Error
+	if err != nil {
+		log.Print("schedule cron insert error: ", err)
+	}
+
+	jobs = *job
 
 	eventFn, ok := s.listeners[event]
 	if ok {

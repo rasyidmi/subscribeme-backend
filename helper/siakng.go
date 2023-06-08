@@ -76,7 +76,7 @@ func ConvertToWeekday(dayStr string) string {
 	case "Selasa":
 		return "Tuesday"
 	case "Rabu":
-		return "Rabu"
+		return "Wednesday"
 	case "Kamis":
 		return "Thursday"
 	case "Jumat":

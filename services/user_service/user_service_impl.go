@@ -47,44 +47,51 @@ func (s *userService) CreateUser(claims *helper.JWTClaim, payload payload.FcmPay
 		return nil, errors.New("404")
 	}
 
-	go func() {
-		var data = map[string]interface{}{}
-		data["npm"] = claims.Npm
-		data["tahun"] = "2019"
-		data["term"] = "2"
-
-		models, err := helper.GetSiakngData[[]models.ClassSchedule](constant.GetClassDetailByNpmMahasiswa, data)
-		if err != nil {
-			log.Println(string("\033[31m"), err.Error())
-		}
-
-		for _, v := range *models {
-			layout := "Monday 15:04:05"
-			day := helper.ConvertToWeekday(v.Day)
-			str := fmt.Sprintf("%s %s", day, v.StartTime)
-
-			t, err := time.Parse(layout, str)
-			if err != nil {
-				fmt.Println("Terjadi kesalahan dalam parsing waktu:", err)
-				return
-			}
-
-			t = t.Add(-15 * time.Minute)
-
-			cronExpression := fmt.Sprintf("%d %d * * %d", t.Minute(), t.Hour(), int(t.Weekday()))
-
-			jsonBytes, err := json.Marshal(v)
-			if err != nil {
-				log.Println(string("\033[31m"), err.Error())
-				return
-			}
-
-			helper.SchedulerEvent.ScheduleCron("ReminderClassWillStarted", string(jsonBytes), cronExpression, user.ID.String(), "")
-		}
-
-	}()
+	go s.setClassReminder(user)
 
 	return response.NewLoginResponse(token, nil), nil
+
+}
+
+func (s *userService) setClassReminder(user models.User) (bool, error) {
+	var data = map[string]interface{}{}
+	data["npm"] = user.Npm
+	data["tahun"] = "2019"
+	data["term"] = "2"
+
+	models, err := helper.GetSiakngData[[]models.ClassSchedule](constant.GetClassDetailByNpmMahasiswa, data)
+	if err != nil {
+		log.Println(string("\033[31m"), err.Error())
+	}
+
+	for _, v := range *models {
+		log.Println(v.ClassDetail.ClassName)
+		layout := "Monday 15:04:05"
+		day := helper.ConvertToWeekday(v.Day)
+
+		str := fmt.Sprintf("%s %s", day, v.StartTime)
+		log.Println(str)
+
+		t, err := time.Parse(layout, str)
+		if err != nil {
+			fmt.Println("Terjadi kesalahan dalam parsing waktu:", err)
+			return false, err
+		}
+
+		t = t.Add(-30 * time.Minute)
+
+		cronExpression := fmt.Sprintf("%d %d * * %d", t.Minute(), t.Hour(), int(t.Weekday()))
+
+		jsonBytes, err := json.Marshal(v)
+		if err != nil {
+			log.Println(string("\033[31m"), err.Error())
+			return false, err
+		}
+
+		helper.SchedulerEvent.ScheduleCron("ReminderClassWillStarted", string(jsonBytes), cronExpression, user.ID.String(), "")
+	}
+
+	return true, nil
 
 }
 
