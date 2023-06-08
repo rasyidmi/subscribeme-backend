@@ -5,6 +5,7 @@ import (
 	"projects-subscribeme-backend/models"
 	"time"
 
+	"gorm.io/datatypes"
 	"gorm.io/gorm"
 )
 
@@ -51,7 +52,7 @@ func (r *courseRepository) FirstOrCreateEvent(event models.ClassEvent) (models.C
 }
 
 func (r *courseRepository) CreateUserEvent(userEvent models.UserEvent) (models.UserEvent, error) {
-	err := r.db.Create(&userEvent).Error
+	err := r.db.FirstOrCreate(&userEvent, models.UserEvent{EventID: userEvent.EventID, UserID: userEvent.UserID}).Error
 
 	return userEvent, err
 }
@@ -114,6 +115,14 @@ func (r *courseRepository) GetCourseByCourseSceleId(courseId int64) (models.Cour
 	return course, err
 }
 
+func (r *courseRepository) GetCourseByCourseID(courseId string) (models.CourseScele, error) {
+	var course models.CourseScele
+
+	err := r.db.Preload("User.UserEvent").First(&course, "id = ?", courseId).Error
+
+	return course, err
+}
+
 func (r *courseRepository) DeleteUserEventByUserIdAndCourseId(userId string, courseId string) error {
 	err := r.db.Where("user_id = ? AND course_id = ?", userId, courseId).Delete(&models.UserEvent{}).Error
 
@@ -131,4 +140,11 @@ func (r *courseRepository) GetEventByEventId(eventId string) (models.ClassEvent,
 	err := r.db.First(&classEvent, "id = ?", eventId).Error
 
 	return classEvent, err
+}
+
+func (r *courseRepository) DeleteJobsByUserIdAndCourseId(userId string, courseId string) error {
+
+	err := r.db.Model(&models.Job{}).Where("user_id = ? AND ?", userId, datatypes.JSONQuery("payload").Equals(courseId, "CourseSceleID")).Delete(&models.Job{}).Error
+
+	return err
 }

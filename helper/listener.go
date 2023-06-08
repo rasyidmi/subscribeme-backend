@@ -23,13 +23,22 @@ func ReminderClassWillStarted(data string, eventId uint, db *gorm.DB) error {
 		fmt.Println(err)
 	}
 
+	//Get job
+	var job models.Job
+	err = db.Preload("User").First(&job, eventId).Error
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
 	timeString := classSchedule.StartTime
 	parts := strings.Split(timeString, ":")
 	hourMinute := parts[0] + ":" + parts[1]
 
 	sendData := make(map[string]string)
 
-	sendData["title"] = "Dalam 30 Menit Kelas Akan Dimulai"
+	sendData["token"] = job.User.FcmToken
+	sendData["title"] = "Dalam 30 menit kelas akan dimulai"
 	sendData["body"] = fmt.Sprintf("Kelas %s akan dimulai pada jam %s", classSchedule.ClassDetail.ClassName, hourMinute)
 
 	err = SendPushNotification(sendData)
@@ -180,6 +189,61 @@ func ReminderAssignmentSetDeadline(data string, eventId uint, db *gorm.DB) error
 
 	sendData["title"] = message
 	sendData["body"] = fmt.Sprintf("Tugas %s akan berakhir pada %s", classEvent.EventName, classEvent.Date.Format("15:04"))
+	sendData["token"] = job.User.FcmToken
+
+	err = SendPushNotification(sendData)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
+	err = db.Delete(&models.Job{}, eventId).Error
+	if err != nil {
+		log.Print("💀 error: ", err)
+	}
+
+	return nil
+}
+
+func ReminderQuizWillOver(data string, eventId uint, db *gorm.DB) error {
+	var classEvent models.ClassEvent
+
+	err := json.Unmarshal([]byte(data), &classEvent)
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	//Get job
+	var job models.Job
+	err = db.Preload("User").First(&job, eventId).Error
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
+	diff := classEvent.Date.Sub(job.RunAt)
+
+	sendData := make(map[string]string)
+
+	days := int(diff.Hours() / 24)
+	hours := int(diff.Hours()) % 24
+	minutes := int(diff.Minutes()) % 60
+
+	message := "Kuis akan berakhir "
+	if days > 0 {
+		message += fmt.Sprintf(" %d hari", days)
+	}
+	if hours > 0 {
+		message += fmt.Sprintf(" %d jam", hours)
+	}
+	if minutes > 0 {
+		message += fmt.Sprintf(" %d menit", minutes)
+	}
+	message += " lagi"
+
+	sendData["title"] = message
+	sendData["body"] = fmt.Sprintf("Kuis %s akan berakhir pada %s", classEvent.EventName, classEvent.Date.Format("15:04"))
 	sendData["token"] = job.User.FcmToken
 
 	err = SendPushNotification(sendData)

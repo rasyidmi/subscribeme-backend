@@ -4,6 +4,7 @@ import (
 	"projects-subscribeme-backend/dto/payload"
 	"projects-subscribeme-backend/dto/response"
 	"projects-subscribeme-backend/helper"
+	"projects-subscribeme-backend/models"
 )
 
 type CourseService interface {
@@ -16,4 +17,6 @@ type CourseService interface {
 	GetDeadline7DaysAheadByUserId(claims *helper.JWTClaim) (*[]response.UserEventResponse, error)
 
 	SetDeadlineReminder(claims *helper.JWTClaim, payload payload.ReminderPayload) (bool, error)
+
+	updateDataUserEvent(events []models.ClassEvent) (bool, error)
 }

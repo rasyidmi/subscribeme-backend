@@ -14,6 +14,7 @@ type User struct {
 	Role        constant.UserRoleEnum
 	FcmToken    string         `gorm:"fcm_token"`
 	CourseScele []*CourseScele `gorm:"many2many:user_course;"`
+	UserEvent   []UserEvent
 }
 
 func (user *User) BeforeCreate(tx *gorm.DB) (err error) {

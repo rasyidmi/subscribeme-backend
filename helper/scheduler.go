@@ -116,7 +116,7 @@ func (s Scheduler) Schedule(event string, payload string, runAt time.Time, userI
 		job.EventID = eventId
 	}
 
-	err := s.db.Create(&job).Error
+	err := s.db.FirstOrCreate(&job, models.Job{UserID: userId, Name: event, Payload: payload, RunAt: runAt}).Error
 	if err != nil {
 		log.Print("schedule insert error: ", err)
 	}

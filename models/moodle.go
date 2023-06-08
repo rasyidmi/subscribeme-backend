@@ -26,6 +26,7 @@ type CourseQuizzez struct {
 	Name         string `json:"name"`
 	TimeOpen     int64  `json:"timeopen"`
 	TimeModified int64  `json:"timemodified"`
+	TimeClose    int64  `json:"timeclose"`
 }
 
 type Moodle struct {

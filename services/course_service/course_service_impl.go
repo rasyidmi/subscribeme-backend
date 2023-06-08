@@ -122,9 +122,30 @@ func (s *courseService) SubscribeCourse(claims *helper.JWTClaim, payload payload
 
 			event, err := s.repository.FirstOrCreateEvent(event)
 			if err != nil {
-				log.Println("ERROR ", err)
 				log.Println(string("\033[31m"), err.Error())
 			}
+
+			//Set Quiz Ended Jobs
+			if v.TimeClose != 0 {
+				loc, err := time.LoadLocation("Asia/Jakarta")
+				if err != nil {
+					log.Println(string("\033[31m"), err.Error())
+					return nil, err
+				}
+				event.Date = time.Unix(v.TimeClose, 0).In(loc)
+
+				jsonBytes, err := json.Marshal(v)
+				if err != nil {
+					log.Println(string("\033[31m"), err.Error())
+					return nil, err
+				}
+
+				tenMinuteBeforeDeadline := event.Date.Add(-time.Minute * 10).In(loc)
+
+				helper.SchedulerEvent.Schedule("ReminderQuizWillOver", string(jsonBytes), tenMinuteBeforeDeadline, user.ID.String(), event.ID.String())
+
+			}
+
 		}
 	}
 
@@ -179,8 +200,41 @@ func (s *courseService) SubscribeCourse(claims *helper.JWTClaim, payload payload
 		}
 	}
 
+	go s.updateDataUserEvent(events)
+
 	return response.NewCourseSceleResponse(course), nil
 
+}
+
+func (s *courseService) updateDataUserEvent(events []models.ClassEvent) (bool, error) {
+	course, err := s.repository.GetCourseByCourseID(events[0].CourseSceleID)
+	if err != nil {
+		log.Println(string("\033[31m"), err.Error())
+		return false, err
+	}
+
+	for _, classEvent := range events {
+		for _, user := range course.User {
+			for _, userEvent := range user.UserEvent {
+				if userEvent.EventID != classEvent.ID.String() {
+					userEvent := models.UserEvent{
+						UserID:   user.ID.String(),
+						EventID:  classEvent.ID.String(),
+						CourseID: classEvent.CourseSceleID,
+						IsDone:   false,
+					}
+
+					userEvent, err := s.repository.CreateUserEvent(userEvent)
+					if err != nil {
+						log.Println(string("\033[31m"), err.Error())
+					}
+				}
+			}
+
+		}
+	}
+
+	return true, nil
 }
 
 func (s *courseService) UnsibscribeCourse(claims *helper.JWTClaim, payload payload.ChooseCourse) (*response.CourseSceleResponse, error) {
@@ -205,6 +259,12 @@ func (s *courseService) UnsibscribeCourse(claims *helper.JWTClaim, payload paylo
 	//Delete User Course
 
 	err = s.repository.DeletUserCourseByUserAndCourse(user, course)
+	if err != nil {
+		log.Println(string("\033[31m"), err.Error())
+		return nil, err
+	}
+
+	err = s.repository.DeleteJobsByUserIdAndCourseId(user.ID.String(), course.ID.String())
 	if err != nil {
 		log.Println(string("\033[31m"), err.Error())
 		return nil, err
