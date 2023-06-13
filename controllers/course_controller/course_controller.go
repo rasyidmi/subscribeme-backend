@@ -11,4 +11,5 @@ type CourseController interface {
 	GetDeadlineTodayByUserId(ctx *gin.Context)
 	GetDeadline7DaysAheadByUserId(ctx *gin.Context)
 	SetDeadlineReminder(ctx *gin.Context)
+	UpdateUserEvent(ctx *gin.Context)
 }

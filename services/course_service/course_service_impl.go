@@ -376,3 +376,18 @@ func (s *courseService) SetDeadlineReminder(claims *helper.JWTClaim, payload pay
 	return true, nil
 
 }
+
+func (s *courseService) UpdateUserEvent(claims *helper.JWTClaim, id string, payload payload.UserEventPayload) (*response.UserEventResponse, error) {
+	user, err := s.userRepository.GetUserByUsername(claims.Username)
+	if err != nil {
+		log.Println(string("\033[31m"), err.Error())
+	}
+
+	userEvent, err := s.repository.UpdateUserEvent(id, user.ID.String(), *payload.IsDone)
+	if err != nil {
+		log.Println(string("\033[31m"), err.Error())
+		return nil, err
+	}
+
+	return response.NewUserEventResponse(userEvent), nil
+}

@@ -17,6 +17,6 @@ type CourseService interface {
 	GetDeadline7DaysAheadByUserId(claims *helper.JWTClaim) (*[]response.UserEventResponse, error)
 
 	SetDeadlineReminder(claims *helper.JWTClaim, payload payload.ReminderPayload) (bool, error)
-
+	UpdateUserEvent(claims *helper.JWTClaim, id string, payload payload.UserEventPayload) (*response.UserEventResponse, error)
 	updateDataUserEvent(events []models.ClassEvent) (bool, error)
 }

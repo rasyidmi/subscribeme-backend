@@ -48,6 +48,15 @@ func NewLoginResponse(token string, isUserExists *bool) *LoginResponse {
 	return response
 }
 
+func NewUserEventResponse(models models.UserEvent) *UserEventResponse {
+	var response UserEventResponse
+
+	copier.Copy(&response, models)
+
+	return &response
+
+}
+
 func NewUserEventResponses(models []models.UserEvent) *[]UserEventResponse {
 	var responses []UserEventResponse
 

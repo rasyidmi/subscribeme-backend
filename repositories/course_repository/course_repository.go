@@ -10,6 +10,7 @@ type CourseRepository interface {
 	DeleteUserEventByUserIdAndCourseId(userId string, courseId string) error
 	DeletUserCourseByUserAndCourse(user models.User, course models.CourseScele) error
 	CreateUserEvent(userEvent models.UserEvent) (models.UserEvent, error)
+	UpdateUserEvent(id string, userId string, isDone bool) (models.UserEvent, error)
 	GetEventByCourseId(courseId string) ([]models.ClassEvent, error)
 	GetEventByEventId(eventId string) (models.ClassEvent, error)
 	GetCourseByCourseID(courseId string) (models.CourseScele, error)

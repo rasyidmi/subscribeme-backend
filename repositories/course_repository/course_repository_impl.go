@@ -148,3 +148,15 @@ func (r *courseRepository) DeleteJobsByUserIdAndCourseId(userId string, courseId
 
 	return err
 }
+
+func (r *courseRepository) UpdateUserEvent(id string, userId string, isDone bool) (models.UserEvent, error) {
+	err := r.db.Model(&models.UserEvent{}).Where("id = ? AND user_id = ?", id, userId).Updates(models.UserEvent{IsDone: isDone}).Error
+	if err != nil {
+		return models.UserEvent{}, err
+	}
+
+	var userEvent models.UserEvent
+
+	err = r.db.First(&userEvent, id).Error
+	return userEvent, err
+}
