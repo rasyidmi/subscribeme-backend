@@ -8,7 +8,7 @@ class LoadTestCourses(HttpUser):
 	getSevenAheadDeadline: str = "/api/v1/course/deadline/7-days"
 	subscribeCourse: str = "/api/v1/course/subscribe"
 	unsubscribeCourse: str = "/api/v1/course/unsubscribe"
-	token: str = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1hIjoiUmFzeWlkIE1pZnRhaHVsIEloc2FuIiwidXNlcm5hbWUiOiJyYXN5aWQubWlmdGFodWwiLCJucG0iOiIxOTA2MjkzMzAzIiwianVydXNhbiI6eyJmYWN1bHR5IjoiSWxtdSBLb21wdXRlciIsInNob3J0RmFjdWx0eSI6IkZhc2lsa29tIiwibWFqb3IiOiJJbG11IEtvbXB1dGVyIChDb21wdXRlciBTY2llbmNlKSIsInByb2dyYW0iOiJTMSBSZWd1bGVyIChVbmRlcmdyYWR1YXRlIFByb2dyYW0pIn0sInJvbGUiOiJNYWhhc2lzd2EiLCJleHAiOjE4MTIwMDk3NjR9.FWYopWkq-YgSMy72xdNniR2ZBoDxQT_Sg-h-g2M--tY"
+	token: str = "jwt-token"
 
 	@task
 	def getcoursesscelebyusername(self):

@@ -40,7 +40,7 @@ func (s *userService) CreateUser(claims *helper.JWTClaim, payload payload.FcmPay
 
 	expirationTime := time.Now().Add(35064 * time.Hour)
 
-	token, err := helper.RefreshJWT(claims, user.Role.String(), expirationTime)
+	token, err := helper.RefreshJWT(claims, user.Role.String(), expirationTime, true)
 	if err != nil {
 
 		log.Println(string("\033[31m"), err.Error())
@@ -97,15 +97,36 @@ func (s *userService) setClassReminder(user models.User) (bool, error) {
 
 func (s *userService) LoginFromSSOUI(ticket string) (*response.LoginResponse, error) {
 
-	user, err := helper.ValidateSSOTicket(ticket, "http://localhost:8080/api/v1/login/sso")
+	sso, err := helper.ValidateSSOTicket(ticket, "http://localhost:8080/api/v1/login/sso")
 	if err != nil {
 		log.Println(string("\033[31m"), err.Error())
 		return nil, err
 	}
 
-	expirationTime := time.Now().Add(2 * time.Hour)
+	isExists := true
 
-	token, err := helper.GenerateJWT(*user, "Mahasiswa", expirationTime)
+	user, err := s.repository.GetUserByUsername(sso.AuthenticationSuccess.User)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			isExists = false
+		} else {
+			log.Println(string("\033[31m"), err.Error())
+			return nil, errors.New("500")
+		}
+
+	}
+
+	role := "Mahasiswa"
+	var expirationTime time.Time
+
+	if isExists {
+		role = user.Role.String()
+		expirationTime = time.Now().Add(35064 * time.Hour)
+	} else {
+		expirationTime = time.Now().Add(2 * time.Hour)
+	}
+
+	token, err := helper.GenerateJWT(*sso, role, expirationTime, isExists)
 	if err != nil {
 
 		log.Println(string("\033[31m"), err.Error())
@@ -145,7 +166,7 @@ func (s *userService) Login(payload payload.SSOPayload) (*response.LoginResponse
 		expirationTime = time.Now().Add(2 * time.Hour)
 	}
 
-	token, err := helper.GenerateJWT(*sso, role, expirationTime)
+	token, err := helper.GenerateJWT(*sso, role, expirationTime, isExists)
 	if err != nil {
 
 		log.Println(string("\033[31m"), err.Error())

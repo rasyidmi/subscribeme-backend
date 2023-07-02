@@ -17,10 +17,11 @@ type JWTClaim struct {
 	Npm      string         `json:"npm"`
 	Jurusan  models.Jurusan `json:"jurusan"`
 	Role     string         `json:"role"`
+	IsExists bool           `json:"is_exists"`
 	jwt.StandardClaims
 }
 
-func GenerateJWT(ssoResponse models.ServiceResponse, role string, expirationTime time.Time) (tokenString string, err error) {
+func GenerateJWT(ssoResponse models.ServiceResponse, role string, expirationTime time.Time, isExists bool) (tokenString string, err error) {
 	configJwt := config.LoadAuthConfig()
 	claims := &JWTClaim{
 		Nama:     ssoResponse.AuthenticationSuccess.Attributes.Nama,
@@ -28,6 +29,7 @@ func GenerateJWT(ssoResponse models.ServiceResponse, role string, expirationTime
 		Npm:      ssoResponse.AuthenticationSuccess.Attributes.Npm,
 		Jurusan:  ssoResponse.AuthenticationSuccess.Attributes.Jurusan,
 		Role:     role,
+		IsExists: isExists,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expirationTime.Unix(),
 		},
@@ -37,7 +39,7 @@ func GenerateJWT(ssoResponse models.ServiceResponse, role string, expirationTime
 	return
 }
 
-func RefreshJWT(claims *JWTClaim, role string, expirationTime time.Time) (tokenString string, err error) {
+func RefreshJWT(claims *JWTClaim, role string, expirationTime time.Time, isExists bool) (tokenString string, err error) {
 	configJwt := config.LoadAuthConfig()
 	newClaims := &JWTClaim{
 		Nama:     claims.Nama,
@@ -45,6 +47,7 @@ func RefreshJWT(claims *JWTClaim, role string, expirationTime time.Time) (tokenS
 		Npm:      claims.Npm,
 		Jurusan:  claims.Jurusan,
 		Role:     role,
+		IsExists: isExists,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expirationTime.Unix(),
 		},

@@ -82,7 +82,7 @@ func ReminderAbsenceWillOver(data string, eventId uint, db *gorm.DB) error {
 
 	sendData["token"] = job.User.FcmToken
 	sendData["title"] = fmt.Sprintf("Cepat lakukan absensi pada kelas %s", classDetail.ClassName)
-	sendData["body"] = fmt.Sprintf("Absensi kelas %s akan ditutup pada %s", classDetail.ClassName, classAbsence.EndTime.Format("15:04"))
+	sendData["body"] = fmt.Sprintf("Absensi kelas %s akan ditutup pada %s", classDetail.ClassName, classAbsence.EndTime.Format("02 Jan 2006 15:04"))
 
 	err = SendPushNotification(sendData)
 	if err != nil {
@@ -167,6 +167,14 @@ func ReminderAssignmentSetDeadline(data string, eventId uint, db *gorm.DB) error
 		return err
 	}
 
+	//Get Course
+	var course models.CourseScele
+	err = db.First(&course, "id = ?", classEvent.CourseSceleID).Error
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
 	diff := classEvent.Date.Sub(job.RunAt)
 
 	sendData := make(map[string]string)
@@ -175,7 +183,7 @@ func ReminderAssignmentSetDeadline(data string, eventId uint, db *gorm.DB) error
 	hours := int(diff.Hours()) % 24
 	minutes := int(diff.Minutes()) % 60
 
-	message := "Tugas Anda tersisa"
+	message := fmt.Sprintf("Tugas %s Anda tersisa", course.CourseSceleName)
 	if days > 0 {
 		message += fmt.Sprintf(" %d hari", days)
 	}
@@ -188,8 +196,11 @@ func ReminderAssignmentSetDeadline(data string, eventId uint, db *gorm.DB) error
 	message += " lagi"
 
 	sendData["title"] = message
-	sendData["body"] = fmt.Sprintf("Tugas %s akan berakhir pada %s", classEvent.EventName, classEvent.Date.Format("15:04"))
+	sendData["body"] = fmt.Sprintf("%s akan berakhir pada %s", classEvent.EventName, classEvent.Date.Format("02 Jan 2006 15:04"))
 	sendData["token"] = job.User.FcmToken
+
+	log.Println(message)
+	log.Println(sendData["body"])
 
 	err = SendPushNotification(sendData)
 	if err != nil {
@@ -222,6 +233,14 @@ func ReminderQuizWillOver(data string, eventId uint, db *gorm.DB) error {
 		return err
 	}
 
+	//Get Course
+	var course models.CourseScele
+	err = db.First(&course, "id = ?", classEvent.CourseSceleID).Error
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
 	diff := classEvent.Date.Sub(job.RunAt)
 
 	sendData := make(map[string]string)
@@ -230,7 +249,7 @@ func ReminderQuizWillOver(data string, eventId uint, db *gorm.DB) error {
 	hours := int(diff.Hours()) % 24
 	minutes := int(diff.Minutes()) % 60
 
-	message := "Kuis akan berakhir "
+	message := fmt.Sprintf("Kuis %s akan berakhir", course.CourseSceleName)
 	if days > 0 {
 		message += fmt.Sprintf(" %d hari", days)
 	}
@@ -243,7 +262,7 @@ func ReminderQuizWillOver(data string, eventId uint, db *gorm.DB) error {
 	message += " lagi"
 
 	sendData["title"] = message
-	sendData["body"] = fmt.Sprintf("Kuis %s akan berakhir pada %s", classEvent.EventName, classEvent.Date.Format("15:04"))
+	sendData["body"] = fmt.Sprintf("%s akan berakhir pada %s", classEvent.EventName, classEvent.Date.Format("02 Jan 2006 15:04"))
 	sendData["token"] = job.User.FcmToken
 
 	err = SendPushNotification(sendData)
@@ -277,6 +296,14 @@ func ReminderQuiztWillBeOver(data string, eventId uint, db *gorm.DB) error {
 		return err
 	}
 
+	//Get Course
+	var course models.CourseScele
+	err = db.First(&course, "id = ?", classEvent.CourseSceleID).Error
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
 	diff := classEvent.Date.Sub(job.RunAt)
 
 	sendData := make(map[string]string)
@@ -285,7 +312,7 @@ func ReminderQuiztWillBeOver(data string, eventId uint, db *gorm.DB) error {
 	hours := int(diff.Hours()) % 24
 	minutes := int(diff.Minutes()) % 60
 
-	message := "Kuis akan dimulai "
+	message := fmt.Sprintf("Kuis %s akan dimulai", course.CourseSceleName)
 	if days > 0 {
 		message += fmt.Sprintf(" %d hari", days)
 	}
@@ -298,7 +325,7 @@ func ReminderQuiztWillBeOver(data string, eventId uint, db *gorm.DB) error {
 	message += " lagi"
 
 	sendData["title"] = message
-	sendData["body"] = fmt.Sprintf("Kuis %s akan dimulai pada %s", classEvent.EventName, classEvent.Date.Format("15:04"))
+	sendData["body"] = fmt.Sprintf("%s akan dimulai pada %s", classEvent.EventName, classEvent.Date.Format("02 Jan 2006 15:04"))
 	sendData["token"] = job.User.FcmToken
 
 	err = SendPushNotification(sendData)
@@ -333,6 +360,14 @@ func ReminderQuizSetDeadline(data string, eventId uint, db *gorm.DB) error {
 		return err
 	}
 
+	//Get Course
+	var course models.CourseScele
+	err = db.First(&course, "id = ?", classEvent.CourseSceleID).Error
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
 	diff := classEvent.Date.Sub(job.RunAt)
 
 	sendData := make(map[string]string)
@@ -341,7 +376,7 @@ func ReminderQuizSetDeadline(data string, eventId uint, db *gorm.DB) error {
 	hours := int(diff.Hours()) % 24
 	minutes := int(diff.Minutes()) % 60
 
-	message := "Kuis akan dimulai "
+	message := fmt.Sprintf("Kuis %s akan dimulai", course.CourseSceleName)
 	if days > 0 {
 		message += fmt.Sprintf(" %d hari", days)
 	}
@@ -354,7 +389,7 @@ func ReminderQuizSetDeadline(data string, eventId uint, db *gorm.DB) error {
 	message += " lagi"
 
 	sendData["title"] = message
-	sendData["body"] = fmt.Sprintf("Kuis %s akan dimulai pada %s", classEvent.EventName, classEvent.Date.Format("15:04"))
+	sendData["body"] = fmt.Sprintf("%s akan dimulai pada %s", classEvent.EventName, classEvent.Date.Format("02 Jan 2006 15:04"))
 	sendData["token"] = job.User.FcmToken
 
 	err = SendPushNotification(sendData)

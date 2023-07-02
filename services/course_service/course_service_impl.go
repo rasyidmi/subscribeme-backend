@@ -189,14 +189,20 @@ func (s *courseService) SubscribeCourse(claims *helper.JWTClaim, payload payload
 
 		if days >= 1 {
 			oneDayBeforeDeadline := v.Date.Add(-time.Hour * 24)
-			helper.SchedulerEvent.Schedule("ReminderAssignmentSetDeadline", string(jsonBytes), oneDayBeforeDeadline, user.ID.String(), v.ID.String())
-			helper.SchedulerEvent.Schedule("ReminderQuizSetDeadline", string(jsonBytes), oneDayBeforeDeadline, user.ID.String(), v.ID.String())
+			if v.Type == constant.AssignmentType {
+				helper.SchedulerEvent.Schedule("ReminderAssignmentSetDeadline", string(jsonBytes), oneDayBeforeDeadline, user.ID.String(), v.ID.String())
+			} else if v.Type == constant.QuizType {
+				helper.SchedulerEvent.Schedule("ReminderQuizSetDeadline", string(jsonBytes), oneDayBeforeDeadline, user.ID.String(), v.ID.String())
+			}
 		}
 
 		if hours >= 1 {
 			oneHourBeforeDeadline := v.Date.Add(-time.Hour * 1)
-			helper.SchedulerEvent.Schedule("ReminderAssignmentSetDeadline", string(jsonBytes), oneHourBeforeDeadline, user.ID.String(), v.ID.String())
-			helper.SchedulerEvent.Schedule("ReminderQuizSetDeadline", string(jsonBytes), oneHourBeforeDeadline, user.ID.String(), v.ID.String())
+			if v.Type == constant.AssignmentType {
+				helper.SchedulerEvent.Schedule("ReminderAssignmentSetDeadline", string(jsonBytes), oneHourBeforeDeadline, user.ID.String(), v.ID.String())
+			} else if v.Type == constant.QuizType {
+				helper.SchedulerEvent.Schedule("ReminderQuizSetDeadline", string(jsonBytes), oneHourBeforeDeadline, user.ID.String(), v.ID.String())
+			}
 		}
 	}
 
@@ -382,6 +388,8 @@ func (s *courseService) UpdateUserEvent(claims *helper.JWTClaim, id string, payl
 	if err != nil {
 		log.Println(string("\033[31m"), err.Error())
 	}
+
+	log.Println(id)
 
 	userEvent, err := s.repository.UpdateUserEvent(id, user.ID.String(), *payload.IsDone)
 	if err != nil {

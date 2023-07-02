@@ -8,7 +8,7 @@ import (
 
 type CourseSceleResponse struct {
 	ID              string `json:"id"`
-	CourseSceleID   int64  `json:"course_secele_id"`
+	CourseSceleID   int64  `json:"course_scele_id"`
 	CourseSceleName string `json:"course_scele_name"`
 }
 

@@ -88,7 +88,7 @@ func (r *courseRepository) GetDeadlineTodayByUserId(userId string) ([]models.Use
 
 	currentDate := time.Now().Format("2006-01-02")
 
-	err := r.db.Preload("ClassEvent").Joins("JOIN class_events ce ON ce.id = user_events.event_id").
+	err := r.db.Preload("ClassEvent").Preload("ClassEvent.CourseScele").Joins("JOIN class_events ce ON ce.id = user_events.event_id").
 		Where("user_id = ?", userId).Where("DATE(ce.date) = ?", currentDate).Order("ce.date ASC").Find(&userEvents).Error
 
 	return userEvents, err
@@ -97,10 +97,10 @@ func (r *courseRepository) GetDeadlineTodayByUserId(userId string) ([]models.Use
 func (r *courseRepository) GetDeadline7DaysAheadByUserId(userId string) ([]models.UserEvent, error) {
 	var userEvents []models.UserEvent
 
-	currentDate := time.Now()
+	currentDate := time.Now().Add(24 * time.Hour)
 	next7Days := currentDate.AddDate(0, 0, 7)
 
-	err := r.db.Preload("ClassEvent").Joins("JOIN class_events ce ON ce.id = user_events.event_id").
+	err := r.db.Preload("ClassEvent").Preload("ClassEvent.CourseScele").Joins("JOIN class_events ce ON ce.id = user_events.event_id").
 		Where("user_id = ?", userId).Where("DATE(ce.date) BETWEEN ? AND ?", currentDate, next7Days).Order("ce.date ASC").Find(&userEvents).Error
 
 	return userEvents, err
@@ -150,13 +150,13 @@ func (r *courseRepository) DeleteJobsByUserIdAndCourseId(userId string, courseId
 }
 
 func (r *courseRepository) UpdateUserEvent(id string, userId string, isDone bool) (models.UserEvent, error) {
-	err := r.db.Model(&models.UserEvent{}).Where("id = ? AND user_id = ?", id, userId).Updates(models.UserEvent{IsDone: isDone}).Error
+	err := r.db.Model(&models.UserEvent{}).Where("id = ? AND user_id = ?", id, userId).Updates(map[string]interface{}{"is_done": isDone}).Error
 	if err != nil {
 		return models.UserEvent{}, err
 	}
 
 	var userEvent models.UserEvent
 
-	err = r.db.First(&userEvent, id).Error
+	err = r.db.First(&userEvent, "id = ?", id).Error
 	return userEvent, err
 }
